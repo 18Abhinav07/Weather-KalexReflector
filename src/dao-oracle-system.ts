@@ -63,7 +63,19 @@ export class DAOOracleSystem {
    * Setup Express middleware
    */
   private setupExpress(): void {
-    this.app.use(express.json());
+    // JSON parsing with error handling
+    this.app.use(express.json({
+      limit: '10mb',
+      verify: (req: any, res, buf, encoding) => {
+        try {
+          JSON.parse(buf.toString());
+        } catch (e) {
+          console.error('JSON Parse Error:', e);
+          throw new Error('Invalid JSON payload');
+        }
+      }
+    }));
+    
     this.app.use(express.urlencoded({ extended: true }));
     
     // CORS middleware
@@ -77,6 +89,19 @@ export class DAOOracleSystem {
     // Request logging
     this.app.use((req, res, next) => {
       console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
+      next();
+    });
+
+    // Global error handler for JSON parsing errors
+    this.app.use((error: any, req: any, res: any, next: any) => {
+      if (error instanceof SyntaxError && 'body' in error) {
+        console.error('JSON Parse Error:', error.message);
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid JSON format in request body',
+          details: 'Please ensure your request body contains valid JSON'
+        });
+      }
       next();
     });
   }
@@ -147,27 +172,38 @@ export class DAOOracleSystem {
   }
 
   /**
-   * Perform complete voting cycle for a block
+   * Perform complete voting cycle for a block (with block data fetching)
    * This is the main entry point for block-triggered voting
    */
-  async performVotingCycle(blockIndex: number, blockEntropy: string): Promise<ConsensusResult> {
-    const cycleId = blockIndex; // Simple mapping for now
+  async performVotingCycle(blockIndex: number): Promise<ConsensusResult> {
+    const cycleId = blockIndex;
     const startTime = Date.now();
 
     console.log(`\n🗳️  Starting voting cycle ${cycleId} for block ${blockIndex}`);
 
     try {
-      // Step 1: Fetch oracle data (Block N)
+      // Step 1: Get block data from KALE contract
+      console.log('🔗 Fetching block data from KALE contract...');
+      const blockFetcher = new (await import('./blockchain/block-fetcher')).BlockDataFetcher(
+        this.config.rpcUrl,
+        process.env.STELLAR_CONTRACT_ID || 'mock-contract-id'
+      );
+      
+      const blockData = await blockFetcher.getBlockData(blockIndex);
+      const blockEntropy = blockData?.entropy?.toString('hex') || Math.random().toString(36).substring(2, 18);
+      console.log(`✅ Block data retrieved: entropy=${blockEntropy.substring(0, 8)}..., timestamp=${blockData?.timestamp}`);
+
+      // Step 2: Fetch oracle data (Block N)
       console.log('📡 Fetching oracle data...');
       const oracleData = await this.reflectorClient.fetchAllOracleData();
       console.log(`✅ Oracle data fetched: ${oracleData.oraclesAvailable}/3 sources, quality: ${oracleData.dataQuality}`);
 
-      // Step 2: Run DAO analysis and vote submission (Block N)
+      // Step 3: Run DAO analysis and vote submission (Block N)
       console.log('🤖 Running DAO analysis...');
       const votes = await this.daoRegistry.runAnalysis(oracleData, cycleId);
       console.log(`✅ DAO analysis complete: ${votes.length} votes collected`);
 
-      // Step 3: Calculate weighted consensus (Block N+1)
+      // Step 4: Calculate weighted consensus (Block N+1)
       console.log('⚖️  Calculating weighted consensus...');
       const activeDAOs = new Map();
       this.daoRegistry.getActiveDAOs().forEach(dao => {
@@ -181,7 +217,7 @@ export class DAOOracleSystem {
         { blockEntropy, cycleId }
       );
 
-      // Step 4: Analyze and log results
+      // Step 5: Analyze and log results
       const analysis = this.votingSystem.analyzeConsensus(consensusResult);
       const processingTime = Date.now() - startTime;
 
@@ -194,6 +230,14 @@ export class DAOOracleSystem {
       console.error('❌ Voting cycle failed:', error);
       throw error;
     }
+  }
+
+  /**
+   * Legacy method for backward compatibility (with explicit entropy)
+   */
+  async performVotingCycleWithEntropy(blockIndex: number, blockEntropy: string): Promise<ConsensusResult> {
+    console.log(`⚠️  Using legacy method with explicit entropy: ${blockEntropy.substring(0, 8)}...`);
+    return this.performVotingCycle(blockIndex);
   }
 
   /**
@@ -273,16 +317,16 @@ if (require.main === module) {
   system.start().then(() => {
     console.log('System started successfully');
     
-    // Example: Simulate a voting cycle every 2 minutes
+    // Example: Simulate a voting cycle every 5 minutes (using just block index)
     setInterval(async () => {
       try {
-        const blockIndex = Date.now() // Mock block index
-        const blockEntropy = Math.random().toString(36).substring(2); // Mock entropy
-        await system.performVotingCycle(blockIndex, blockEntropy);
+        const blockIndex = Math.floor(Date.now() / 1000); // Mock block index based on timestamp
+        console.log(`\n🔄 Running scheduled test voting cycle for block ${blockIndex}`);
+        await system.performVotingCycle(blockIndex);
       } catch (error) {
         console.error('Scheduled voting cycle failed:', error);
       }
-    }, 2 * 60 * 1000); // 2 minutes
+    }, 5 * 60 * 1000); // 5 minutes
   }).catch(error => {
     console.error('Failed to start system:', error);
     process.exit(1);

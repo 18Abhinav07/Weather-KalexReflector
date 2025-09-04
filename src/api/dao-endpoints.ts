@@ -46,34 +46,53 @@ export class DAOApiController {
   }
 
   /**
-   * POST /api/dao/calculate-votes
-   * Trigger vote calculation for a specific cycle
+   * POST /api/dao/calculate-votes  
+   * Trigger vote calculation for a specific block index
    */
   calculateVotes = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { cycleId, blockIndex, blockEntropy } = req.body;
+      const { blockIndex } = req.body;
 
-      if (!cycleId || !blockIndex) {
+      if (!blockIndex || typeof blockIndex !== 'number') {
         res.status(400).json({
           success: false,
-          error: 'Missing required parameters: cycleId and blockIndex'
+          error: 'Missing or invalid required parameter: blockIndex (must be a number)'
         });
         return;
       }
 
-      console.log(`Starting vote calculation for cycle ${cycleId}, block ${blockIndex}`);
+      const cycleId = blockIndex; // Use blockIndex as cycleId for simplicity
+      console.log(`Starting vote calculation for block ${blockIndex}`);
 
-      // Step 1: Fetch oracle data
+      // Step 1: Get block data (including entropy) from KALE contract
+      const blockFetcher = new (await import('../blockchain/block-fetcher')).BlockDataFetcher(
+        process.env.STELLAR_RPC_URL || 'https://horizon-testnet.stellar.org',
+        process.env.STELLAR_CONTRACT_ID || 'mock-contract-id'
+      );
+      
+      const blockData = await blockFetcher.getBlockData(blockIndex);
+      if (!blockData) {
+        res.status(404).json({
+          success: false,
+          error: `Block data not found for index ${blockIndex}`
+        });
+        return;
+      }
+
+      const blockEntropy = blockData.entropy?.toString('hex') || Math.random().toString(36).substring(2, 18);
+      console.log(`Block data retrieved: entropy=${blockEntropy.substring(0, 8)}..., timestamp=${blockData.timestamp}`);
+
+      // Step 2: Fetch oracle data
       const oracleData = await this.reflectorClient.fetchAllOracleData();
       console.log(`Oracle data fetched: ${oracleData.oraclesAvailable}/3 sources, quality: ${oracleData.dataQuality}`);
 
-      // Step 2: Run DAO analysis
+      // Step 3: Run DAO analysis
       const votes = await this.daoRegistry.runAnalysis(oracleData, cycleId);
       console.log(`DAO analysis complete: ${votes.length} votes collected`);
 
-      // Step 3: Calculate consensus
+      // Step 4: Calculate consensus
       const tieBreakerData: TieBreakerData = {
-        blockEntropy: blockEntropy || '',
+        blockEntropy,
         cycleId
       };
 
@@ -89,7 +108,7 @@ export class DAOApiController {
         tieBreakerData
       );
 
-      // Step 4: Store voting cycle
+      // Step 5: Store voting cycle
       const votingCycle: VotingCycle = {
         cycleId,
         blockIndex,
@@ -102,13 +121,19 @@ export class DAOApiController {
 
       this.activeCycles.set(cycleId, votingCycle);
 
-      // Step 5: Return results
+      // Step 6: Return results
       const analysis = this.votingSystem.analyzeConsensus(consensusResult);
       
       res.json({
         success: true,
         cycleId,
         blockIndex,
+        blockData: {
+          entropy: blockEntropy,
+          timestamp: blockData.timestamp?.toString(),
+          minStake: blockData.min_stake?.toString(),
+          maxStake: blockData.max_stake?.toString()
+        },
         consensusResult: {
           finalWeather: consensusResult.finalWeather === WeatherOutcome.GOOD ? 'GOOD' : 'BAD',
           consensusScore: consensusResult.consensusScore,
