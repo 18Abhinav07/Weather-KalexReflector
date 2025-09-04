@@ -13,10 +13,22 @@ import {
   OracleAssetData 
 } from '../types/oracle-types';
 
-// Import DAO philosophy implementations
+// Import all DAO philosophy implementations
 import { CryptoMomentumDAO } from '../dao/philosophies/crypto-momentum-dao';
 import { KalePerformanceDAO } from '../dao/philosophies/kale-performance-dao';
 import { XlmDominanceDAO } from '../dao/philosophies/xlm-dominance-dao';
+import { MeanReversionDAO } from '../dao/philosophies/mean-reversion-dao';
+import { VolatilityClusteringDAO } from '../dao/philosophies/volatility-clustering-dao';
+import { FlightToSafetyDAO } from '../dao/philosophies/flight-to-safety-dao';
+import { CrossChainStressDAO } from '../dao/philosophies/cross-chain-stress-dao';
+import { StellarDEXHealthDAO } from '../dao/philosophies/stellar-dex-health-dao';
+import { AquaNetworkDAO } from '../dao/philosophies/aqua-network-dao';
+import { RegionalTokenDAO } from '../dao/philosophies/regional-token-dao';
+import { CorrelationBreakdownDAO } from '../dao/philosophies/correlation-breakdown-dao';
+import { LiquidityPremiumDAO } from '../dao/philosophies/liquidity-premium-dao';
+import { StablecoinPegDAO } from '../dao/philosophies/stablecoin-peg-dao';
+import { MultiTimeframeDAO } from '../dao/philosophies/multi-timeframe-dao';
+import { VolumePriceDAO } from '../dao/philosophies/volume-price-dao';
 
 export class DAOApiController {
   private reflectorClient: ReflectorClient;
@@ -37,12 +49,24 @@ export class DAOApiController {
    * Setup DAO philosophy implementations
    */
   private setupDAOPhilosophies(): void {
+    // Register all 15 DAO philosophy implementations
     this.daoRegistry.registerPhilosophy('crypto-momentum', new CryptoMomentumDAO());
     this.daoRegistry.registerPhilosophy('kale-performance', new KalePerformanceDAO());
     this.daoRegistry.registerPhilosophy('xlm-dominance', new XlmDominanceDAO());
+    this.daoRegistry.registerPhilosophy('mean-reversion', new MeanReversionDAO());
+    this.daoRegistry.registerPhilosophy('volatility-clustering', new VolatilityClusteringDAO());
+    this.daoRegistry.registerPhilosophy('flight-to-safety', new FlightToSafetyDAO());
+    this.daoRegistry.registerPhilosophy('cross-chain-stress', new CrossChainStressDAO());
+    this.daoRegistry.registerPhilosophy('stellar-dex-health', new StellarDEXHealthDAO());
+    this.daoRegistry.registerPhilosophy('aqua-network', new AquaNetworkDAO());
+    this.daoRegistry.registerPhilosophy('regional-token', new RegionalTokenDAO());
+    this.daoRegistry.registerPhilosophy('correlation-breakdown', new CorrelationBreakdownDAO());
+    this.daoRegistry.registerPhilosophy('liquidity-premium', new LiquidityPremiumDAO());
+    this.daoRegistry.registerPhilosophy('stablecoin-peg', new StablecoinPegDAO());
+    this.daoRegistry.registerPhilosophy('multi-timeframe', new MultiTimeframeDAO());
+    this.daoRegistry.registerPhilosophy('volume-price', new VolumePriceDAO());
     
-    // TODO: Register remaining DAO philosophies
-    console.log('DAO philosophies registered: 3/15+ implementations');
+    console.log('DAO philosophies registered: 15/15 implementations (Phase 2 complete)');
   }
 
   /**
@@ -121,19 +145,13 @@ export class DAOApiController {
 
       this.activeCycles.set(cycleId, votingCycle);
 
-      // Step 6: Return results
+      // Step 6: Return secure results (no vote details revealed)
       const analysis = this.votingSystem.analyzeConsensus(consensusResult);
       
       res.json({
         success: true,
         cycleId,
         blockIndex,
-        blockData: {
-          entropy: blockEntropy,
-          timestamp: blockData.timestamp?.toString(),
-          minStake: blockData.min_stake?.toString(),
-          maxStake: blockData.max_stake?.toString()
-        },
         consensusResult: {
           finalWeather: consensusResult.finalWeather === WeatherOutcome.GOOD ? 'GOOD' : 'BAD',
           consensusScore: consensusResult.consensusScore,
@@ -145,13 +163,9 @@ export class DAOApiController {
           agreement: analysis.agreement,
           summary: analysis.summary
         },
-        oracleData: {
-          quality: oracleData.dataQuality,
-          sourcesAvailable: oracleData.oraclesAvailable,
-          timestamp: oracleData.timestamp
-        },
         voteCount: votes.length,
-        processingTime: Date.now() - votingCycle.startTime
+        processingTime: Date.now() - votingCycle.startTime,
+        message: `Voting cycle ${cycleId} completed. Use /api/dao/reveal-votes/${cycleId} to see detailed predictions.`
       });
 
     } catch (error) {

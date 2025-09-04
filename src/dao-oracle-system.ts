@@ -14,6 +14,18 @@ import { VotingCycle, OracleAssetData, ConsensusResult } from './types/oracle-ty
 import { CryptoMomentumDAO } from './dao/philosophies/crypto-momentum-dao';
 import { KalePerformanceDAO } from './dao/philosophies/kale-performance-dao';
 import { XlmDominanceDAO } from './dao/philosophies/xlm-dominance-dao';
+import { MeanReversionDAO } from './dao/philosophies/mean-reversion-dao';
+import { VolatilityClusteringDAO } from './dao/philosophies/volatility-clustering-dao';
+import { FlightToSafetyDAO } from './dao/philosophies/flight-to-safety-dao';
+import { CrossChainStressDAO } from './dao/philosophies/cross-chain-stress-dao';
+import { StellarDEXHealthDAO } from './dao/philosophies/stellar-dex-health-dao';
+import { AquaNetworkDAO } from './dao/philosophies/aqua-network-dao';
+import { RegionalTokenDAO } from './dao/philosophies/regional-token-dao';
+import { CorrelationBreakdownDAO } from './dao/philosophies/correlation-breakdown-dao';
+import { LiquidityPremiumDAO } from './dao/philosophies/liquidity-premium-dao';
+import { StablecoinPegDAO } from './dao/philosophies/stablecoin-peg-dao';
+import { MultiTimeframeDAO } from './dao/philosophies/multi-timeframe-dao';
+import { VolumePriceDAO } from './dao/philosophies/volume-price-dao';
 
 export interface SystemConfig {
   rpcUrl: string;
@@ -148,27 +160,25 @@ export class DAOOracleSystem {
    * Register DAO philosophy implementations
    */
   private setupDAOPhilosophies(): void {
-    // Register the implemented DAO philosophies
+    // Register all 15 DAO philosophy implementations
     this.daoRegistry.registerPhilosophy('crypto-momentum', new CryptoMomentumDAO());
     this.daoRegistry.registerPhilosophy('kale-performance', new KalePerformanceDAO());
     this.daoRegistry.registerPhilosophy('xlm-dominance', new XlmDominanceDAO());
-    
-    // TODO: Register remaining DAO philosophies
-    // - Mean Reversion DAO
-    // - Volatility Clustering DAO
-    // - Flight to Safety DAO
-    // - Cross-Chain Stress DAO
-    // - Stellar DEX Health DAO
-    // - AQUA Network DAO
-    // - Regional Token DAO
-    // - Correlation Breakdown DAO
-    // - Liquidity Premium DAO
-    // - Stablecoin Peg DAO
-    // - Multi-Timeframe DAO
-    // - Volume-Price DAO
+    this.daoRegistry.registerPhilosophy('mean-reversion', new MeanReversionDAO());
+    this.daoRegistry.registerPhilosophy('volatility-clustering', new VolatilityClusteringDAO());
+    this.daoRegistry.registerPhilosophy('flight-to-safety', new FlightToSafetyDAO());
+    this.daoRegistry.registerPhilosophy('cross-chain-stress', new CrossChainStressDAO());
+    this.daoRegistry.registerPhilosophy('stellar-dex-health', new StellarDEXHealthDAO());
+    this.daoRegistry.registerPhilosophy('aqua-network', new AquaNetworkDAO());
+    this.daoRegistry.registerPhilosophy('regional-token', new RegionalTokenDAO());
+    this.daoRegistry.registerPhilosophy('correlation-breakdown', new CorrelationBreakdownDAO());
+    this.daoRegistry.registerPhilosophy('liquidity-premium', new LiquidityPremiumDAO());
+    this.daoRegistry.registerPhilosophy('stablecoin-peg', new StablecoinPegDAO());
+    this.daoRegistry.registerPhilosophy('multi-timeframe', new MultiTimeframeDAO());
+    this.daoRegistry.registerPhilosophy('volume-price', new VolumePriceDAO());
 
     const activeDAOs = this.daoRegistry.getActiveDAOs();
-    console.log(`DAO philosophies registered: 3 of ${activeDAOs.length} total DAOs`);
+    console.log(`DAO philosophies registered: ${activeDAOs.length} total DAOs (Phase 2 complete)`);
   }
 
   /**
