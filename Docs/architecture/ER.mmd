@@ -1,0 +1,209 @@
+erDiagram
+    USERS {
+        string user_address PK
+        uint256 total_kale_balance
+        uint32 cycles_participated
+        uint32 total_plant_actions
+        uint32 total_store_actions  
+        uint32 total_wagers
+        decimal total_winnings
+        decimal total_losses
+        uint256 created_at
+        uint256 last_active
+    }
+    
+    CYCLES {
+        uint32 cycle_id PK
+        uint32 start_block
+        uint32 end_block
+        string current_state
+        uint32 total_participants
+        uint256 total_kale_staked
+        string selected_location
+        decimal final_weather_score
+        string weather_outcome
+        uint256 created_at
+        uint256 settled_at
+    }
+    
+    DAOS {
+        string dao_id PK
+        string dao_name
+        string philosophy_type
+        decimal accuracy_percentage
+        uint32 total_predictions
+        uint32 correct_predictions
+        uint256 voting_power
+        string status
+        uint256 created_at
+    }
+    
+    DAO_VOTES {
+        string vote_id PK
+        string dao_id FK
+        uint32 cycle_id FK
+        string predicted_weather
+        decimal confidence_level
+        uint256 vote_timestamp
+        uint256 reveal_timestamp
+        bool was_correct
+    }
+    
+    FARM_POSITIONS {
+        string position_id PK
+        string user_address FK
+        uint32 cycle_id FK
+        string farm_action
+        uint256 stake_amount
+        decimal dynamic_multiplier
+        uint256 final_reward
+        string position_status
+        uint256 created_at
+        uint256 settled_at
+    }
+    
+    WAGER_POSITIONS {
+        string wager_id PK
+        string user_address FK
+        uint32 cycle_id FK
+        string bet_direction
+        uint256 stake_amount
+        uint256 final_payout
+        string wager_status
+        uint256 created_at
+        uint256 settled_at
+    }
+    
+    TREASURY_POOLS {
+        string pool_id PK
+        string pool_name
+        uint256 current_balance
+        uint256 pending_obligations
+        decimal health_ratio
+        decimal dynamic_rate
+        uint256 total_inflow
+        uint256 total_outflow
+        uint256 last_updated
+    }
+    
+    POOL_TRANSACTIONS {
+        string transaction_id PK
+        string pool_id FK
+        uint32 cycle_id FK
+        string transaction_type
+        uint256 amount
+        string direction
+        string reason
+        uint256 timestamp
+    }
+    
+    CROSS_POOL_LOANS {
+        string loan_id PK
+        string lender_pool_id FK
+        string borrower_pool_id FK
+        uint256 loan_amount
+        decimal interest_rate
+        uint8 total_payments
+        uint8 remaining_payments
+        uint32 next_payment_cycle
+        string loan_status
+        uint256 created_at
+    }
+    
+    LOCATIONS {
+        string location_id PK
+        string city_name
+        string country_code
+        decimal latitude
+        decimal longitude
+        uint256 population
+        decimal weather_reliability_score
+        uint256 selection_weight
+        uint32 times_selected
+        bool is_active
+    }
+    
+    WEATHER_DATA {
+        string weather_id PK
+        string location_id FK
+        uint32 cycle_id FK
+        decimal temperature
+        decimal precipitation
+        decimal wind_speed
+        decimal humidity
+        decimal composite_score
+        string api_source
+        uint8 api_attempt_number
+        bool is_valid
+        uint256 collected_at
+    }
+    
+    KALE_TRANSACTIONS {
+        string tx_id PK
+        string user_address FK
+        uint32 cycle_id FK
+        string transaction_type
+        uint256 amount
+        string direction
+        string contract_source
+        string related_position_id
+        uint256 gas_used
+        string tx_hash
+        uint256 block_number
+        uint256 timestamp
+    }
+    
+    SYSTEM_CONFIG {
+        string config_key PK
+        string config_value
+        string data_type
+        string description
+        uint256 last_updated
+        string updated_by
+    }
+    
+    ANALYTICS_SNAPSHOTS {
+        string snapshot_id PK
+        uint32 cycle_id FK
+        uint32 total_users
+        uint256 total_kale_staked
+        uint32 planters_count
+        uint32 storers_count
+        uint32 wagers_count
+        decimal avg_stake_amount
+        string popular_strategy
+        uint256 created_at
+    }
+    
+    %% User Relationships
+    USERS ||--o{ FARM_POSITIONS : creates
+    USERS ||--o{ WAGER_POSITIONS : places
+    USERS ||--o{ KALE_TRANSACTIONS : executes
+    
+    %% Cycle Relationships  
+    CYCLES ||--o{ FARM_POSITIONS : contains
+    CYCLES ||--o{ WAGER_POSITIONS : contains
+    CYCLES ||--o{ DAO_VOTES : receives
+    CYCLES ||--o{ WEATHER_DATA : has
+    CYCLES ||--o{ KALE_TRANSACTIONS : processes
+    CYCLES ||--o{ POOL_TRANSACTIONS : generates
+    CYCLES ||--o{ ANALYTICS_SNAPSHOTS : produces
+    CYCLES ||--o{ LOCATIONS : selects
+    
+    %% DAO Relationships
+    DAOS ||--o{ DAO_VOTES : submits
+    
+    %% Pool Relationships
+    TREASURY_POOLS ||--o{ POOL_TRANSACTIONS : records
+    TREASURY_POOLS ||--o{ CROSS_POOL_LOANS : lends_to
+    TREASURY_POOLS ||--o{ CROSS_POOL_LOANS : borrows_from
+    
+    %% Location Relationships
+    LOCATIONS ||--o{ WEATHER_DATA : provides
+    
+    %% Transaction Relationships
+    FARM_POSITIONS ||--o{ KALE_TRANSACTIONS : triggers
+    WAGER_POSITIONS ||--o{ KALE_TRANSACTIONS : triggers
+    
+    %% Loan Relationships  
+    CROSS_POOL_LOANS ||--o{ POOL_TRANSACTIONS : creates_repayments

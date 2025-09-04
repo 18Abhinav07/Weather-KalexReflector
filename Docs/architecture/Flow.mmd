@@ -1,0 +1,104 @@
+flowchart TD 
+    A[🚀 System Initialization] --> B[Block N: Cycle Start]
+    
+    B --> C[🗳️ DAO Voting Phase]
+    C --> C1[Bull DAO Analyzes Reflector Data]
+    C --> C2[Bear DAO Analyzes Reflector Data] 
+    C --> C3[Technical DAO Analyzes Reflector Data]
+    C --> C4[Sentiment DAO Analyzes Reflector Data]
+    
+    C1 --> D[Block N+1: Vote Reveal]
+    C2 --> D
+    C3 --> D  
+    C4 --> D
+    
+    D --> E[📊 DAO Predictions Public]
+    E --> F[👥 Users See DAO Votes]
+    
+    F --> G[🌱 Farming & Wagering Opens]
+    G --> G1[Users Choose: PLANT or STORE]
+    G --> G2[Users Choose: Wager GOOD or BAD]
+    G --> G3[Stake KALE tokens]
+    
+    G1 --> H{Block N+5?}
+    G2 --> H
+    G3 --> H
+    
+    H -->|Yes| I[🚫 Wagering Closes]
+    H -->|No| G
+    
+    I --> IA[🎲 Random Earth Location Selection]
+    IA --> IB[Cryptographic Location Hash]
+    IB --> IC[📍 Location Revealed]
+    
+    IC --> J[Blocks N+6 to N+9: Farm Actions Only]
+    J --> J1[Only PLANT/STORE allowed]
+    J --> J2[No more wagering]
+    J --> J3[📍 Location Known to Farmers]
+    
+    J1 --> K{Block N+10?}
+    J2 --> K
+    J3 --> K
+    
+    K -->|Yes| L[⏰ All Actions Close]
+    K -->|No| J
+    
+    L --> O[🌤️ Weather Data Collection]
+    O --> P1[API Call #1]
+    P1 --> P2{Success?}
+    P2 -->|No| P3[API Call #2]
+    P2 -->|Yes| Q[Real Weather Data Obtained]
+    P3 --> P4{Success?}
+    P4 -->|No| P5[API Call #3] 
+    P4 -->|Yes| Q
+    P5 --> P6{Success?}
+    P6 -->|No| R[Real Weather = 0]
+    P6 -->|Yes| Q
+    
+    Q --> S[🧮 Weather Calculation]
+    R --> S
+    
+    S --> T[Calculate Final Weather Score]
+    T --> T1[DAO_Consensus × 50%]
+    T --> T2[Real_Weather × 30%]
+    T --> T3[Community_Bets × 20%]
+    
+    T1 --> U[Final Weather Score Calculation]
+    T2 --> U
+    T3 --> U
+    
+    U --> V{Final Weather > 50?}
+    V -->|Yes| W[🌞 GOOD WEATHER Declared]
+    V -->|No| X[🌧️ BAD WEATHER Declared]
+    
+    W --> Y[💰 Rewards Distribution]
+    X --> Y
+    
+    Y --> Y1[Plant Winners: Block Reward + Dynamic Bonus]
+    Y --> Y2[Plant Losers: Dynamic Stake Bleeding]
+    Y --> Y3[Store Good Weather: Pay Dynamic Rent]
+    Y --> Y4[Store Bad Weather: Earn Dynamic Premium]
+    Y --> Y5[Wager Winners: Take Wager Pool]
+    Y --> Y6[Wager Losers: Forfeit Stakes]
+    
+    Y1 --> Z[🔄 Pool Rebalancing]
+    Y2 --> Z
+    Y3 --> Z
+    Y4 --> Z
+    Y5 --> Z
+    Y6 --> Z
+    
+    Z --> Z1[Check Pool Health Ratios]
+    Z1 --> Z2{Any Pool < 120%?}
+    Z2 -->|Yes| Z3[Emergency Cross-Pool Lending]
+    Z2 -->|No| AA[Block N+11: New Cycle Begins]
+    
+    Z3 --> AA
+    AA --> B
+    
+    style A fill:#10b981,stroke:#059669,color:#fff
+    style B fill:#3b82f6,stroke:#1e40af,color:#fff
+    style W fill:#10b981,stroke:#059669,color:#fff
+    style X fill:#ef4444,stroke:#dc2626,color:#fff
+    style Y fill:#fbbf24,stroke:#f59e0b,color:#000
+    style AA fill:#10b981,stroke:#059669,color:#fff

@@ -1,0 +1,122 @@
+flowchart LR
+    subgraph "🌐 External Data Sources"
+        A1[📡 Stellar Reflector Network]
+        A2[🌤️ Weather API #1]
+        A3[🌤️ Weather API #2] 
+        A4[🌤️ Weather API #3]
+        A5[🌍 Earth Location Database]
+    end
+    
+    subgraph "🤖 Autonomous DAO Layer"
+        B1[🐂 Bull DAO]
+        B2[🐻 Bear DAO]
+        B3[📈 Technical DAO]
+        B4[💭 Sentiment DAO]
+    end
+    
+    subgraph "⚙️ Smart Contract Core"
+        C1[🗳️ DAO Registry Contract]
+        C2[🌤️ Weather Resolution Contract]
+        C3[🌱 Kale Farming Contract]  
+        C4[🎲 Weather Wagering Contract]
+        C5[🏦 Treasury Pool Manager]
+        C6[🔄 Cycle State Manager]
+    end
+    
+    subgraph "💾 Data Storage Layer"
+        D1[(🗳️ DAO Votes)]
+        D2[(📊 Historical Accuracy)]
+        D3[(💰 Pool Balances)]
+        D4[(👤 User Positions)]
+        D5[(🌍 Location Grid)]
+        D6[(⏰ Cycle States)]
+    end
+    
+    subgraph "👥 User Interface Layer"
+        E1[📱 Web Frontend]
+        E2[🔗 Wallet Integration]
+        E3[📊 Analytics Dashboard]
+        E4[🎯 Strategy Tools]
+    end
+    
+    %% External Data Flows
+    A1 -->|Market Data| B1
+    A1 -->|Market Data| B2
+    A1 -->|Market Data| B3
+    A1 -->|Market Data| B4
+    
+    A2 -->|Weather Data| C2
+    A3 -->|Weather Data| C2
+    A4 -->|Weather Data| C2
+    A5 -->|Location Data| C2
+    
+    %% DAO Processing Flows
+    B1 -->|Bull Prediction| C1
+    B2 -->|Bear Prediction| C1  
+    B3 -->|Technical Analysis| C1
+    B4 -->|Sentiment Analysis| C1
+    
+    %% Smart Contract Internal Flows
+    C1 -->|DAO Consensus| C2
+    C1 <-->|Vote Storage| D1
+    C1 <-->|Accuracy Tracking| D2
+    
+    C2 -->|Weather Outcome| C3
+    C2 -->|Weather Outcome| C4
+    C2 <-->|Location Selection| D5
+    
+    C3 -->|Farm Rewards/Penalties| C5
+    C4 -->|Wager Payouts| C5
+    C5 <-->|Pool Management| D3
+    
+    C6 -->|State Transitions| C1
+    C6 -->|State Transitions| C2
+    C6 -->|State Transitions| C3
+    C6 -->|State Transitions| C4
+    C6 <-->|Cycle Tracking| D6
+    
+    %% User Interaction Flows
+    E1 -->|Farm Actions| C3
+    E1 -->|Wager Actions| C4
+    E1 <-->|Position Management| D4
+    
+    E2 -->|KALE Transactions| C3
+    E2 -->|KALE Transactions| C4
+    
+    E3 <-->|Performance Data| D2
+    E3 <-->|Pool Health Data| D3
+    E3 <-->|Historical Data| D6
+    
+    E4 <-->|Strategy Analysis| D1
+    E4 <-->|DAO Tracking| D2
+    E4 <-->|Market Insights| D3
+    
+    %% Cross-Contract Communication
+    C3 -.->|Pool Health Checks| C5
+    C4 -.->|Pool Health Checks| C5  
+    C5 -.->|Emergency Lending| C3
+    C5 -.->|Emergency Lending| C4
+    
+    %% Data Persistence Flows
+    C3 <-->|User Farm Data| D4
+    C4 <-->|User Wager Data| D4
+    C2 <-->|Weather Results| D6
+    
+    %% Information Display Flows  
+    D1 -.->|Current Votes| E1
+    D2 -.->|DAO Performance| E1
+    D3 -.->|Pool Status| E1
+    D4 -.->|User Portfolio| E1
+    D5 -.->|Location Info| E1
+    D6 -.->|Cycle Status| E1
+    
+    %% Styling
+    classDef external fill:#e2e8f0,stroke:#475569,color:#1e293b
+    classDef dao fill:#22c55e,stroke:#16a34a,color:#fff
+    classDef contract fill:#3b82f6,stroke:#1e40af,color:#fff
+    classDef storage fill:#fbbf24,stroke:#f59e0b,color:#1e293b
+    classDef interface fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    
+    class C1,C2,C3,C4,C5,C6 contract
+    class D1,D2,D3,D4,D5,D6 storage
+    class E1,E2,E3,E4 interface

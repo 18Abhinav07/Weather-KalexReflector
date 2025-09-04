@@ -1,0 +1,169 @@
+flowchart TD
+    A[⏰ Block 10: Actions Close] --> B[🎲 Random Location Selection]
+    
+    B --> C[📐 Cryptographic Calculation]
+    C --> C1[location_hash = hash block_entropy + cycle_id]
+    C1 --> C2[earth_index = location_hash % dynamic_grid_size]
+    C2 --> C3[📍 Select Population-Weighted Location]
+    
+    C3 --> D[🌍 Earth Location Revealed]
+    D --> D1[🏙️ Location Examples:]
+    D --> D1A[Tokyo, Japan]
+    D --> D1B[London, UK]
+    D --> D1C[New York, USA]
+    D --> D1D[Sydney, Australia]
+    
+    D1A --> E[🌤️ Weather API Collection Phase]
+    D1B --> E
+    D1C --> E
+    D1D --> E
+    
+    E --> F[📡 API Attempt #1]
+    F --> G{API Success?}
+    G -->|Yes| H[✅ Real Weather Data Obtained]
+    G -->|No| I[📡 API Attempt #2]
+    
+    I --> J{API Success?}
+    J -->|Yes| H
+    J -->|No| K[📡 API Attempt #3]
+    
+    K --> L{API Success?}
+    L -->|Yes| H
+    L -->|No| M[❌ All APIs Failed]
+    
+    H --> N[🌿 Kale Growing Conditions Analysis]
+    N --> N1[🌡️ Temperature: 18-24°C optimal]
+    N --> N2[🌧️ Precipitation: Light rain good]
+    N --> N3[💨 Wind: Moderate wind beneficial]
+    N --> N4[💧 Humidity: 60-70% ideal]
+    
+    N1 --> O[📊 Composite Weather Score]
+    N2 --> O
+    N3 --> O
+    N4 --> O
+    
+    O --> O1[weather_score = temp_score + precip_score + wind_score + humidity_score whole by 4]
+    O1 --> O2[normalized_score = weather_score × 100]
+    O2 --> P[🎯 Real Weather Component]
+    
+    M --> M1[🚫 Real Weather = 0]
+    M1 --> P
+    
+    P --> Q[📊 Community Betting Analysis]
+    Q --> Q1[💰 Total GOOD Weather Stakes]
+    Q --> Q2[💰 Total BAD Weather Stakes]
+    Q --> Q3[📈 Calculate Bet Influence]
+    
+    Q1 --> R[🧮 Betting Influence Calculation]
+    Q2 --> R
+    Q3 --> R
+    
+    R --> R1[total_stakes = good_stakes + bad_stakes]
+    R1 --> R2[larger_side = max of good_stakes, bad_stakes ]
+    R2 --> R3[stake_ratio = larger_side / total_stakes]
+    R3 --> R4[influence_strength = stake_ratio - range of 0.5  2.0 times of stake]
+    R4 --> R5{Which side larger?}
+    
+    R5 -->|GOOD Stakes| R6[bet_influence = +influence_strength]
+    R5 -->|BAD Stakes| R7[bet_influence = -influence_strength]
+    
+    R6 --> S[🗳️ DAO Consensus Retrieval]
+    R7 --> S
+    
+    S --> S1[📊 Weighted DAO Vote Calculation]
+    S1 --> S1A[Bull DAO: vote × hidden_power_1]
+    S1 --> S1B[Bear DAO: vote × hidden_power_2]  
+    S1 --> S1C[Technical DAO: vote × hidden_power_3]
+    S1 --> S1D[Sentiment DAO: vote × hidden_power_4]
+    
+    S1A --> T[🧮 Final Weather Calculation]
+    S1B --> T
+    S1C --> T
+    S1D --> T
+    
+    T --> T1[📝 Weather Formula Application]
+    T1 --> T2{All APIs Failed?}
+    T2 -->|Yes| T3[final = dao_consensus × 0.6 + bet_influence × 0.4]
+    T2 -->|No| T4[final = dao_consensus × 0.5 + real_weather × 0.3 + bet_influence × 0.2]
+    
+    T3 --> U[🎯 Final Weather Score]
+    T4 --> U
+    
+    U --> V{Final Score > 50?}
+    V -->|Yes| W[🌞 GOOD WEATHER OUTCOME]
+    V -->|No| X[🌧️ BAD WEATHER OUTCOME]
+    
+    W --> Y[💰 Reward Distribution Phase]
+    X --> Y
+    
+    Y --> Y1[🏦 Pool Health Check]
+    Y1 --> Y1A[Calculate Current Pool Ratios]
+    Y1A --> Y1B[planted_health = balance / obligations]
+    Y1B --> Y1C[insurance_health = balance / obligations]
+    Y1C --> Y1D[rent_health = balance / obligations]
+    Y1D --> Y1E[wager_health = balance / obligations]
+    
+    Y1E --> Z[📊 Dynamic Multiplier Calculation]
+    Z --> Z1[🌱 Plant Rewards Calculation]
+    Z --> Z2[🏠 Storage Outcomes Calculation]  
+    Z --> Z3[🎲 Wager Payouts Calculation]
+    
+    Z1 --> Z1A{Weather Outcome?}
+    Z1A -->|GOOD| Z1B[Individual Reward = total KALE ÷ total_planters + dynamic_bonus]
+    Z1A -->|BAD| Z1C[Individual Loss = stake × dynamic_bleeding_rate]
+    
+    Z1B --> Z1D[dynamic_bonus = base_bonus × minof plant_health/2.0, 2.0]
+    Z1C --> Z1E[bleeding_rate = base_bleeding × pool_stress_factor]
+    
+    Z2 --> Z2A{Weather Outcome?}
+    Z2A -->|GOOD| Z2B[Individual Cost = stake × dynamic_rent_rate]
+    Z2A -->|BAD| Z2C[Individual Reward = stake × dynamic_premium_rate]
+    
+    Z2B --> Z2D[rent_rate = base_rent × health_multiplier × demand_factor]
+    Z2C --> Z2E[premium_rate = base_premium × health_factor ÷ supply_factor]
+    
+    Z3 --> Z3A{Weather Outcome?}
+    Z3A -->|GOOD| Z3B[GOOD Bettors Win: Share Total Wager Pool]
+    Z3A -->|BAD| Z3C[BAD Bettors Win: Share Total Wager Pool]
+    
+    Z1D --> AA[💸 Execute All Transfers]
+    Z1E --> AA
+    Z2D --> AA
+    Z2E --> AA
+    Z3B --> AA
+    Z3C --> AA
+    
+    AA --> AA1[🔄 Token Mint/Burn Operations]
+    AA1 --> AA2[📊 Update Pool Balances]
+    AA2 --> AA3[📈 Update User Balances]
+    AA3 --> AA4[🏆 Record DAO Accuracy]
+    
+    AA4 --> BB[🚨 Emergency Pool Check]
+    BB --> BB1{Any Pool Health < 120%?}
+    BB1 -->|Yes| BB2[🔄 Cross-Pool Emergency Lending]
+    BB1 -->|No| CC[✅ Settlement Complete]
+    
+    BB2 --> BB3[Find Highest Surplus Pool]
+    BB3 --> BB4[Transfer Emergency Funds]
+    BB4 --> BB5[Record Loan for Future Repayment]
+    BB5 --> CC
+    
+    CC --> DD[🔄 Prepare Next Cycle]
+    DD --> DD1[Increment Cycle Counter]
+    DD --> DD2[Reset User Participation Flags]
+    DD --> DD3[Prepare DAO Voting Phase]
+    DD --> DD4[Update Dynamic Earth Grid]
+    
+    DD1 --> EE[🚀 Block 11: New Cycle Begins]
+    DD2 --> EE
+    DD3 --> EE
+    DD4 --> EE
+    
+    style A fill:#3b82f6,stroke:#1e40af,color:#fff
+    style W fill:#22c55e,stroke:#16a34a,color:#fff
+    style X fill:#ef4444,stroke:#dc2626,color:#fff
+    style Y fill:#fbbf24,stroke:#f59e0b,color:#000
+    style AA fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    style BB2 fill:#ef4444,stroke:#dc2626,color:#fff
+    style CC fill:#10b981,stroke:#059669,color:#fff
+    style EE fill:#10b981,stroke:#059669,color:#fff

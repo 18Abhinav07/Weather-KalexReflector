@@ -1,0 +1,128 @@
+flowchart TD
+    A[👤 User Enters System] --> B{Has KALE Tokens?}
+    B -->|No| B1[🔄 Get KALE from Farm/Exchange]
+    B -->|Yes| C[📊 Check Current Cycle Status]
+    
+    B1 --> C
+    
+    C --> D{Cycle Phase?}
+    D -->|Block 1| D1[⏳ Wait for DAO Vote Reveal]
+    D -->|Block 2-5| E[🎯 Full Participation Phase]
+    D -->|Block 6-9| F[🌱 Farm Actions Only]
+    D -->|Block 10+| G[⏰ Wait for Next Cycle]
+    
+    D1 --> H[Block 2: DAO Votes Revealed]
+    E --> I[📈 Analyze Available Information]
+    F --> J[🌱 Farm Decision Only]
+    G --> K[💰 Check Previous Rewards]
+    
+    H --> I
+    K --> A
+    
+    I --> I1[📊 Review DAO Predictions]
+    I --> I2[📈 Analyze DAO Historical Accuracy]
+    I --> I3[💰 Check Current Betting Patterns]
+    I --> I4[🏦 Review Pool Health Status]
+    
+    I1 --> L[🎲 Make Strategic Decision]
+    I2 --> L
+    I3 --> L  
+    I4 --> L
+    
+    L --> M{What Actions?}
+    M -->|Farming Only| M1[🌱 Choose Farm Strategy]
+    M -->|Wagering Only| M2[🎲 Choose Wager Strategy]
+    M -->|Both| M3[🔀 Choose Farm + Wager Strategy]
+    
+    M1 --> N1{Farm Strategy?}
+    N1 -->|High Risk| N1A[🌱 PLANT Strategy]
+    N1 -->|Conservative| N1B[🏠 STORE Strategy] 
+    N1 -->|Split| N1C[🔀 Split Between Plant/Store]
+    
+    M2 --> N2{Wager Strategy?}
+    N2 -->|Speculation| N2A[🎰 Bet on Weather Outcome]
+    N2 -->|Influence| N2B[🌊 Large Bet to Influence]
+    
+    M3 --> N3[📊 Plan Combined Strategy]
+    N3 --> N3A[Choose Farm Action + Wager Direction]
+    
+    N1A --> O1[💰 Stake KALE for Planting]
+    N1B --> O2[💰 Stake KALE for Storage]
+    N1C --> O3[💰 Split KALE Between Plant/Store]
+    
+    N2A --> O4[💰 Stake KALE for Weather Bet]
+    N2B --> O5[💰 Large KALE Stake for Influence]
+    
+    N3A --> O6[💰 Stake KALE for Farm + Wager]
+    
+    O1 --> P1[Farm Only: PLANT Risks/Rewards]
+    O2 --> P2[Farm Only: STORE Risks/Rewards]  
+    O3 --> P3[Farm Only: SPLIT Risks/Rewards]
+    O4 --> P4[Wager Only: Weather Bet Risks/Rewards]
+    O5 --> P5[Wager Only: Influence Attempt Risks/Rewards]
+    O6 --> P6[Combined: Farm + Wager Risks/Rewards]
+    
+    P1 --> R[✅ Confirm All Actions]
+    P2 --> R
+    P3 --> R
+    P4 --> R
+    P5 --> R
+    P6 --> R
+    
+    R --> X[📋 Transaction Summary]
+    X --> X1[🌱 Farm Action: Type + Amount]
+    X --> X2[🎲 Wager Action: Direction + Amount] 
+    X --> X3[💸 Total KALE at Risk]
+    X --> X4[🎯 Potential Outcomes Range]
+    
+    X1 --> Y[🔐 Submit to Smart Contract]
+    X2 --> Y
+    X3 --> Y
+    X4 --> Y
+    
+    Y --> Z{Transaction Successful?}
+    Z -->|Yes| AA[✅ Actions Recorded]
+    Z -->|No| AB[❌ Error Handling]
+    
+    AB --> AC[Check Balance/Permissions]
+    AC --> AD{Retry Transaction?}
+    AD -->|Yes| Y
+    AD -->|No| AE[❌ Exit Process]
+    
+    AA --> AF[⏳ Wait for Cycle Resolution]
+    AF --> AG[🏆 Block 11: Results & Rewards]
+    
+    AG --> AH[📊 View Results Summary]
+    AH --> AH1[🌤️ Final Weather Outcome]
+    AH --> AH2[💰 Farm Rewards/Losses]  
+    AH --> AH3[🎲 Wager Rewards/Losses]
+    AH --> AH4[📈 Net Position Change]
+    
+    AH1 --> AI[🔄 Start Next Cycle?]
+    AH2 --> AI
+    AH3 --> AI
+    AH4 --> AI
+    
+    AI -->|Yes| AJ[📚 Learn from Results]
+    AI -->|No| AK[🏁 Exit System]
+    
+    AJ --> AJ1[📊 Update DAO Performance Tracking]
+    AJ --> AJ2[🎯 Refine Strategy Based on Outcomes]
+    AJ --> AJ3[💡 Analyze Market/Weather Patterns]
+    
+    AJ1 --> A
+    AJ2 --> A
+    AJ3 --> A
+    
+    J --> JA[🌱 Farm Decision Only]
+    JA --> JB{Plant or Store?}
+    JB -->|Plant| N1
+    JB -->|Store| N2
+    
+    style A fill:#10b981,stroke:#059669,color:#fff
+    style M1 fill:#ef4444,stroke:#dc2626,color:#fff
+    style M2 fill:#22c55e,stroke:#16a34a,color:#fff
+    style M3 fill:#3b82f6,stroke:#1e40af,color:#fff
+    style AA fill:#10b981,stroke:#059669,color:#fff
+    style AB fill:#ef4444,stroke:#dc2626,color:#fff
+    style AG fill:#fbbf24,stroke:#f59e0b,color:#000

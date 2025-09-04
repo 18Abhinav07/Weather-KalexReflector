@@ -1,0 +1,185 @@
+classDiagram
+    class WeatherCycleManager {
+        +uint32 currentCycle
+        +uint32 currentBlock
+        +CycleState currentState
+        +mapping cycles
+        +startNewCycle()
+        +advanceState()
+        +getCurrentPhase()
+        +isValidTransition()
+    }
+    
+    class DAORegistry {
+        +mapping daos
+        +mapping votingPowers
+        +mapping accuracyHistory
+        +registerDAO()
+        +submitVote()
+        +revealVotes()
+        +calculateConsensus()
+        +updateAccuracy()
+    }
+    
+    class WeatherResolution {
+        +mapping earthLocations
+        +uint256 locationGridSize
+        +WeatherAPI[3] weatherAPIs
+        +selectRandomLocation()
+        +collectWeatherData()
+        +calculateFinalWeather()
+        +processWeatherOutcome()
+    }
+    
+    class KaleFarming {
+        +mapping userFarmPositions
+        +uint256 totalPlanters
+        +uint256 totalStorers
+        +plant()
+        +store()
+        +calculatePlantRewards()
+        +calculateStorageOutcomes()
+        +distributeFarmRewards()
+    }
+    
+    class WeatherWagering {
+        +mapping userWagers
+        +uint256 totalGoodStakes
+        +uint256 totalBadStakes
+        +placeBet()
+        +calculateBetInfluence()
+        +distributeWagerRewards()
+        +getStakeRatio()
+    }
+    
+    class TreasuryPoolManager {
+        +PoolBalance plantedPool
+        +PoolBalance insurancePool
+        +PoolBalance rentPool
+        +PoolBalance wagerPool
+        +mapping activeLends
+        +checkPoolHealth()
+        +emergencyLending()
+        +processLoanRepayments()
+        +calculateDynamicRates()
+    }
+    
+    class KaleToken {
+        +uint256 totalSupply
+        +mapping balances
+        +mint()
+        +burn()
+        +transfer()
+        +approve()
+        +getFarmingReward()
+    }
+    
+    class LocationOracle {
+        +mapping populationWeights
+        +uint256 gridSize
+        +addLocation()
+        +getWeightedLocation()
+        +updateGrid()
+    }
+    
+    class WeatherAPI {
+        +string endpoint
+        +uint8 priority
+        +bool active
+        +fetchWeatherData()
+        +parseResponse()
+        +validateData()
+    }
+    
+    %% Relationships
+    WeatherCycleManager --> DAORegistry : manages
+    WeatherCycleManager --> WeatherResolution : triggers
+    WeatherCycleManager --> KaleFarming : coordinates
+    WeatherCycleManager --> WeatherWagering : coordinates
+    WeatherCycleManager --> TreasuryPoolManager : manages
+    
+    DAORegistry --> WeatherResolution : provides consensus
+    WeatherResolution --> LocationOracle : uses
+    WeatherResolution --> WeatherAPI : queries
+    WeatherResolution --> KaleFarming : notifies outcome
+    WeatherResolution --> WeatherWagering : notifies outcome
+    
+    KaleFarming --> TreasuryPoolManager : requests funds
+    WeatherWagering --> TreasuryPoolManager : requests funds
+    KaleFarming --> KaleToken : mints/burns
+    WeatherWagering --> KaleToken : mints/burns
+    TreasuryPoolManager --> KaleToken : manages
+    
+    %% Enums and Data Structures
+    class CycleState {
+        <<enumeration>>
+        VOTING_PHASE
+        REVEAL_PHASE
+        FULL_PARTICIPATION
+        FARM_ONLY
+        ACTIONS_CLOSED
+        SETTLEMENT
+    }
+    
+    class WeatherOutcome {
+        <<enumeration>>
+        GOOD_WEATHER
+        BAD_WEATHER
+        NO_DATA
+    }
+    
+    class FarmAction {
+        <<enumeration>>
+        PLANT
+        STORE
+    }
+    
+    class WagerDirection {
+        <<enumeration>>
+        BET_GOOD
+        BET_BAD
+    }
+    
+    class PoolBalance {
+        +uint256 balance
+        +uint256 obligations
+        +uint256 healthRatio
+        +updateBalance()
+        +calculateHealth()
+    }
+    
+    class UserPosition {
+        +address user
+        +FarmAction action
+        +uint256 farmStake
+        +WagerDirection wagerDirection
+        +uint256 wagerStake
+        +uint32 cycleId
+    }
+    
+    class DAOVote {
+        +bytes32 daoId
+        +WeatherOutcome prediction
+        +uint256 confidence
+        +uint32 cycleId
+        +uint256 timestamp
+    }
+    
+    class LoanContract {
+        +bytes32 lenderPool
+        +bytes32 borrowerPool
+        +uint256 amount
+        +uint256 interestRate
+        +uint8 remainingPayments
+        +uint32 nextPaymentCycle
+    }
+    
+    WeatherCycleManager ..> CycleState
+    WeatherResolution ..> WeatherOutcome
+    KaleFarming ..> FarmAction
+    WeatherWagering ..> WagerDirection
+    TreasuryPoolManager ..> PoolBalance
+    TreasuryPoolManager ..> LoanContract
+    KaleFarming ..> UserPosition
+    WeatherWagering ..> UserPosition
+    DAORegistry ..> DAOVote

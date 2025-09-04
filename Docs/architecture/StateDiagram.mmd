@@ -1,0 +1,124 @@
+stateDiagram-v2
+    [*] --> CYCLE_START
+    
+    CYCLE_START : Block N Cycle Initialization
+    CYCLE_START : Initialize new cycle ID
+    CYCLE_START : Reset user participation flags
+    CYCLE_START : Start DAO voting phase
+    
+    VOTING_PHASE : Block N DAO Voting
+    VOTING_PHASE : DAOs analyze Reflector data
+    VOTING_PHASE : Internal DAO consensus building
+    VOTING_PHASE : Vote submission to registry
+    
+    REVEAL_PHASE : Block N+1 Vote Reveal
+    REVEAL_PHASE : DAO votes made public
+    REVEAL_PHASE : Calculate weighted consensus
+    REVEAL_PHASE : Open user participation
+    
+    FULL_PARTICIPATION : Blocks N+2 to N+5 Full Actions
+    FULL_PARTICIPATION : Users can PLANT or STORE
+    FULL_PARTICIPATION : Users can place weather wagers
+    FULL_PARTICIPATION : Stake KALE tokens for positions
+    
+    WAGER_CLOSE : Block N+5 Wagering Stops
+    WAGER_CLOSE : No more weather betting allowed
+    WAGER_CLOSE : Random earth location selection
+    WAGER_CLOSE : Location revealed to users
+    
+    FARM_ONLY : Blocks N+6 to N+9 Farm Actions Only
+    FARM_ONLY : Users can PLANT or STORE only
+    FARM_ONLY : No wagering allowed
+    FARM_ONLY : Location known for informed decisions
+    
+    ACTIONS_CLOSED : Block N+10 All Actions Stop
+    ACTIONS_CLOSED : No user actions allowed
+    ACTIONS_CLOSED : Initiate weather data collection
+    ACTIONS_CLOSED : Prepare for settlement
+    
+    WEATHER_RESOLUTION : Block N+10 Weather Calculation
+    WEATHER_RESOLUTION : Query weather APIs (3 attempts)
+    WEATHER_RESOLUTION : Calculate final weather score
+    WEATHER_RESOLUTION : Determine GOOD vs BAD outcome
+    
+    SETTLEMENT : Block N+11 Reward Distribution
+    SETTLEMENT : Calculate dynamic multipliers
+    SETTLEMENT : Distribute farm rewards/penalties
+    SETTLEMENT : Distribute wager payouts
+    SETTLEMENT : Update pool balances
+    
+    POOL_REBALANCING : Block N+11 Pool Management
+    POOL_REBALANCING : Check pool health ratios
+    POOL_REBALANCING : Execute emergency lending if needed
+    POOL_REBALANCING : Process loan repayments
+    
+    DAO_UPDATE : Block N+11 DAO Accuracy Update
+    DAO_UPDATE : Compare DAO predictions to outcome
+    DAO_UPDATE : Update historical accuracy metrics
+    DAO_UPDATE : Adjust reputation scores
+    
+    %% State Transitions
+    CYCLE_START --> VOTING_PHASE : Block N starts
+    VOTING_PHASE --> REVEAL_PHASE : Block N+1 reached
+    REVEAL_PHASE --> FULL_PARTICIPATION : User participation opens
+    FULL_PARTICIPATION --> WAGER_CLOSE : Block N+5 reached
+    WAGER_CLOSE --> FARM_ONLY : Location revealed
+    FARM_ONLY --> ACTIONS_CLOSED : Block N+10 reached
+    ACTIONS_CLOSED --> WEATHER_RESOLUTION : Weather collection starts
+    WEATHER_RESOLUTION --> SETTLEMENT : Weather outcome determined
+    SETTLEMENT --> POOL_REBALANCING : Rewards distributed
+    POOL_REBALANCING --> DAO_UPDATE : Pools balanced
+    DAO_UPDATE --> CYCLE_START : Next cycle begins
+    
+    %% Emergency Transitions
+    FULL_PARTICIPATION --> EMERGENCY_PAUSE : System emergency
+    FARM_ONLY --> EMERGENCY_PAUSE : System emergency
+    WAGER_CLOSE --> EMERGENCY_PAUSE : System emergency
+    
+    EMERGENCY_PAUSE : 🚨 Emergency State
+    EMERGENCY_PAUSE : - All user actions suspended
+    EMERGENCY_PAUSE : - Admin intervention required
+    EMERGENCY_PAUSE : - System diagnostic mode
+    
+    EMERGENCY_PAUSE --> CYCLE_START : Emergency resolved
+    EMERGENCY_PAUSE --> EMERGENCY_SETTLEMENT : Force settlement
+    
+    EMERGENCY_SETTLEMENT : ⚡ Emergency Settlement
+    EMERGENCY_SETTLEMENT : - Pro-rata position unwinding
+    EMERGENCY_SETTLEMENT : - Proportional pool distributions
+    EMERGENCY_SETTLEMENT : - Minimal user impact resolution
+    
+    EMERGENCY_SETTLEMENT --> CYCLE_START : System restored
+    
+    %% Self-loops for conditions
+    VOTING_PHASE --> VOTING_PHASE : Block < N+1
+    FULL_PARTICIPATION --> FULL_PARTICIPATION : Block < N+5
+    FARM_ONLY --> FARM_ONLY : Block < N+10
+    
+    %% Notes
+    note right of CYCLE_START
+        Each cycle is exactly 10 blocks long
+        Block timing is deterministic
+        No timestamp dependencies
+    end note
+    
+    note right of WAGER_CLOSE
+        Location selection uses:
+        hash(block_entropy + cycle_id) % grid_size
+        Population-weighted randomness
+    end note
+    
+    note right of WEATHER_RESOLUTION
+        Weather APIs queried in sequence:
+        1. Primary API attempt
+        2. Secondary API attempt  
+        3. Tertiary API attempt
+        If all fail: Real Weather = 0
+    end note
+    
+    note right of SETTLEMENT
+        Dynamic calculations based on:
+        - Pool health ratios
+        - Supply/demand factors
+        - Total participants count
+    end note

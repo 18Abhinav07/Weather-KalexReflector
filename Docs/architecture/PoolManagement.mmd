@@ -1,0 +1,157 @@
+flowchart TD
+    A[💰 Pool Management Cycle Start] --> B[📊 Health Assessment Phase]
+    
+    B --> C[🏦 Calculate Individual Pool Health]
+    C --> C1[🌱 Planted Pool Health]
+    C --> C2[🛡️ Insurance Pool Health]  
+    C --> C3[🏠 Rent Pool Health]
+    C --> C4[🎲 Wager Pool Health]
+    
+    C1 --> D1[planted_health = balance ÷ pending_block_rewards]
+    C2 --> D2[insurance_health = balance ÷ pending_premiums]
+    C3 --> D3[rent_health = balance ÷ operational_costs]
+    C4 --> D4[wager_health = balance ÷ pending_payouts]
+    
+    D1 --> E[🚨 Critical Health Check]
+    D2 --> E
+    D3 --> E
+    D4 --> E
+    
+    E --> F{Any Pool < 120%?}
+    F -->|No| G[✅ All Pools Healthy]
+    F -->|Yes| H[🚨 Emergency Protocol Triggered]
+    
+    G --> I[📈 Normal Operations Continue]
+    I --> I1[💰 Dynamic Rate Calculations]
+    I1 --> I1A[rent_rate = base × health_factor]
+    I1 --> I1B[premium_rate = base × health_factor]
+    I1 --> I1C[bleeding_rate = base × stress_factor]
+    I1 --> I1D[bonus_rate = base × health_factor]
+    
+    H --> J[🔍 Identify Critical Pools]
+    J --> J1{Which Pool Critical?}
+    
+    J1 -->|Insurance| K1[🛡️ Insurance Pool Emergency]
+    J1 -->|Planted| K2[🌱 Planted Pool Emergency]
+    J1 -->|Rent| K3[🏠 Rent Pool Emergency]  
+    J1 -->|Wager| K4[🎲 Wager Pool Emergency]
+    
+    K1 --> L[💸 Calculate Required Emergency Funds]
+    K2 --> L
+    K3 --> L
+    K4 --> L
+    
+    L --> L1[required = target_health × obligations - current_balance]
+    L1 --> L2[target_health = 150% safety margin]
+    
+    L2 --> M[🔍 Find Potential Lenders]
+    M --> M1[📊 Calculate Surplus Ratios]
+    
+    M1 --> M2[For Each Pool: surplus_ratio = Balance - obligations then divide by balance]
+    M2 --> M3[🏆 Rank Pools by Surplus Ratio]
+    M3 --> N[👑 Select Highest Surplus Pool as Lender]
+    
+    N --> O{Lender has Sufficient Surplus?}
+    O -->|Yes| P[💰 Execute Emergency Transfer]
+    O -->|No| Q[🔍 Try Next Highest Surplus Pool]
+    
+    Q --> R{More Pools Available?}
+    R -->|Yes| N
+    R -->|No| S[🚨 System-Wide Emergency]
+    
+    P --> P1[📋 Lending Transaction Details]
+    P1 --> P1A[loan_amount = min of required, 50% of lender_surplus]
+    P1 --> P1B[interest_rate = 2% per 5 cycles]
+    P1 --> P1C[repayment_schedule = 10 equal installments]
+    
+    P1A --> T[📝 Record Loan Contract]
+    P1B --> T
+    P1C --> T
+    
+    T --> T1[💾 Store Loan Details]
+    T1 --> T1A[lender_pool_id]
+    T1 --> T1B[borrower_pool_id]
+    T1 --> T1C[loan_amount]
+    T1 --> T1D[interest_rate]
+    T1 --> T1E[remaining_payments]
+    T1 --> T1F[next_payment_cycle]
+    
+    T1A --> U[🔄 Update Pool Balances]
+    T1B --> U
+    T1C --> U
+    T1D --> U
+    T1E --> U
+    T1F --> U
+    
+    U --> U1[lender_balance -= loan_amount]
+    U1 --> U2[borrower_balance += loan_amount]
+    U2 --> V[✅ Emergency Resolved]
+    
+    S --> S1[🚨 Protocol-Wide Emergency Measures]
+    S1 --> S1A[📱 Alert Protocol Administrators]
+    S1 --> S1B[🔒 Pause New Cycle Starts]
+    S1 --> S1C[📊 Detailed Insolvency Report]
+    S1 --> S1D[🤝 Community Governance Required]
+    
+    I1A --> W[🔄 Loan Repayment Processing]
+    I1B --> W
+    I1C --> W
+    I1D --> W
+    V --> W
+    
+    W --> X[📅 Check Active Loans]
+    X --> Y{Any Payments Due This Cycle?}
+    Y -->|No| Z[✅ No Loan Actions Required]
+    Y -->|Yes| AA[💰 Process Loan Repayments]
+    
+    AA --> AA1[📋 For Each Due Payment:]
+    AA1 --> AA2[payment = loan_amount ÷ installments]
+    AA2 --> AA3[interest = payment × interest_rate]
+    AA3 --> AA4[total_payment = payment + interest]
+    
+    AA4 --> BB{Borrower Pool Healthy?}
+    BB -->|Yes| CC[✅ Execute Repayment]  
+    BB -->|No| DD[⏳ Defer Payment Additional Interest]
+    
+    CC --> CC1[borrower_balance -= total_payment]
+    CC1 --> CC2[lender_balance += total_payment]
+    CC2 --> CC3[remaining_payments -= 1]
+    
+    DD --> DD1[deferred_payments += 1]
+    DD1 --> DD2[accumulated_interest += additional_penalty]
+    
+    CC3 --> EE{Loan Fully Repaid?}
+    DD2 --> EE
+    
+    EE -->|Yes| FF[🎉 Loan Contract Completed]
+    EE -->|No| GG[📅 Schedule Next Payment]
+    
+    FF --> HH[🗑️ Remove Loan Record]
+    GG --> HH
+    
+    Z --> II[📊 Generate Pool Health Report]
+    HH --> II
+    
+    II --> II1[📈 Current Pool Status Summary]
+    II --> II2[💰 Total System Liquidity]
+    II --> II3[🔍 Risk Assessment Metrics]
+    II --> II4[📋 Active Loan Portfolio]
+    II --> II5[🎯 Recommended Rate Adjustments]
+    
+    II1 --> JJ[🔄 Next Cycle Pool Management]
+    II2 --> JJ
+    II3 --> JJ
+    II4 --> JJ
+    II5 --> JJ
+    
+    JJ --> A
+    
+    style A fill:#10b981,stroke:#059669,color:#fff
+    style H fill:#ef4444,stroke:#dc2626,color:#fff
+    style G fill:#22c55e,stroke:#16a34a,color:#fff
+    style P fill:#fbbf24,stroke:#f59e0b,color:#1e293b
+    style S fill:#ef4444,stroke:#dc2626,color:#fff
+    style V fill:#10b981,stroke:#059669,color:#fff
+    style FF fill:#22c55e,stroke:#16a34a,color:#fff
+    style CC fill:#22c55e,stroke:#16a34a,color:#fff
+    style DD fill:#f59e0b,stroke:#d97706,color:#fff
