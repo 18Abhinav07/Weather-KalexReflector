@@ -97,11 +97,21 @@ Block N+2: User Actions Begin
 - **Block Integration**: ⏳ Ready for integration with existing block monitor
 
 ### 📋 Ready for Integration:
-The system is now ready for integration with the existing block monitoring system from `ref/block-monitor.ts`. The main entry point is:
+The system is now ready for integration with the existing block monitoring system from `ref/block-monitor.ts`. 
 
+**Quick Start:**
+```bash
+bun install     # Install dependencies
+bun run setup   # Copy .env file
+bun run dev     # Start development server
+```
+
+**Integration Example:**
 ```typescript
+import { createDAOOracleSystem } from './src/dao-oracle-system';
+
 const system = createDAOOracleSystem({
-  rpcUrl: 'https://soroban-testnet.stellar.org',
+  rpcUrl: 'https://soroban-testnet.stellar.org', 
   port: 3000,
   stellarNetwork: 'testnet'
 });
@@ -109,6 +119,12 @@ const system = createDAOOracleSystem({
 // Trigger from block monitor
 await system.performVotingCycle(blockIndex, blockEntropy);
 ```
+
+**API Endpoints Available:**
+- `POST /api/dao/calculate-votes` - Calculate and return DAO votes 
+- `GET /api/dao/reveal-votes/:cycleId` - Get vote results for public display
+- `GET /api/dao/performance/:daoId` - DAO accuracy metrics
+- `GET /api/dao/status` - System health and status
 
 ## Key Decisions Made
 
