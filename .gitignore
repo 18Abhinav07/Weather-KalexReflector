@@ -60,5 +60,5 @@ temp/
 
 # Keep ref/* as reference examples (removing from ignore)
 # ref/*
-
+references/*
 *.lock
