@@ -1,0 +1,429 @@
+{
+  "totalTests": 61,
+  "passedTests": 61,
+  "failedTests": 0,
+  "successRate": "100.0",
+  "components": {
+    "database": {
+      "status": "passed",
+      "tests": [
+        {
+          "name": "Schema file exists",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.452Z"
+        },
+        {
+          "name": "Table users defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.452Z"
+        },
+        {
+          "name": "Table custodial_wallets defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.452Z"
+        },
+        {
+          "name": "Table weather_cycles defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.452Z"
+        },
+        {
+          "name": "Table farm_positions defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.452Z"
+        },
+        {
+          "name": "Table plant_requests defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.452Z"
+        },
+        {
+          "name": "Table transaction_log defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.452Z"
+        },
+        {
+          "name": "Balance summary view defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.452Z"
+        },
+        {
+          "name": "Connection module exists",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.452Z"
+        }
+      ],
+      "errors": []
+    },
+    "userService": {
+      "status": "passed",
+      "tests": [
+        {
+          "name": "User service file exists",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "registerUser function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "getUserProfile function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "getUserBalanceSummary function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        }
+      ],
+      "errors": []
+    },
+    "custodialWallet": {
+      "status": "passed",
+      "tests": [
+        {
+          "name": "Custodial wallet manager exists",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "generateCustodialWallet function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "decryptPrivateKey function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "AES encryption implemented",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        }
+      ],
+      "errors": []
+    },
+    "plantRequest": {
+      "status": "passed",
+      "tests": [
+        {
+          "name": "Plant request service exists",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "submitPlantRequest function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "validatePlantRequest function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "getRequestsForBlock function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "Weather cycle integration",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        }
+      ],
+      "errors": []
+    },
+    "depositMonitor": {
+      "status": "passed",
+      "tests": [
+        {
+          "name": "Deposit monitor service exists",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "startMonitoring function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "processDeposit function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "Stellar Horizon integration",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "getCustodialWalletBalance function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        }
+      ],
+      "errors": []
+    },
+    "weatherIntegration": {
+      "status": "passed",
+      "tests": [
+        {
+          "name": "Weather integration service exists",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "determineWeatherOutcome function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "calculateWeatherModifier function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "applyCycleSettlement function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "DAO controller integration",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "Weather multipliers defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        }
+      ],
+      "errors": []
+    },
+    "farmingAutomation": {
+      "status": "passed",
+      "tests": [
+        {
+          "name": "Farming automation engine exists",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "startAutomation function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "executePlantTransaction function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "executeWorkTransaction function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "executeHarvestTransaction function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "KALE client integration",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "healthCheck function defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        }
+      ],
+      "errors": []
+    },
+    "apiEndpoints": {
+      "status": "passed",
+      "tests": [
+        {
+          "name": "API endpoints file exists",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "registerUser endpoint defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "getUserProfile endpoint defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "processDeposit endpoint defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "submitPlantRequest endpoint defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "getFarmPositions endpoint defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "getWeatherStatistics endpoint defined",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "Routes configuration exists",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "Express app configuration exists",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "Security middleware configured",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "Rate limiting configured",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "Health check endpoint",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        }
+      ],
+      "errors": []
+    },
+    "integration": {
+      "status": "passed",
+      "tests": [
+        {
+          "name": "Main entry point exists",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "Package.json exists",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "Express dependency configured",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "PostgreSQL dependency configured",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "CORS dependency configured",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "Helmet security configured",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "Stellar SDK configured",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "KALE SDK configured",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        },
+        {
+          "name": "Environment example exists",
+          "passed": true,
+          "error": null,
+          "timestamp": "2025-09-05T21:32:03.453Z"
+        }
+      ],
+      "errors": []
+    }
+  },
+  "timestamp": "2025-09-05T21:32:03.454Z"
+}
