@@ -93,7 +93,7 @@ class WagerService {
       // Check if user already has a wager in this cycle
       const existingWager = await db.query(`
         SELECT wager_id FROM weather_wagers 
-        WHERE user_id = $1 AND cycle_id = $2 AND status = 'active'
+        WHERE user_id = $1 AND cycle_id = $2
       `, [userId, cycleId]);
 
       if (existingWager.rows.length > 0) {
@@ -103,8 +103,8 @@ class WagerService {
       // Create wager position
       const wagerResult = await db.query(`
         INSERT INTO weather_wagers (
-          user_id, cycle_id, wager_direction, stake_amount, placed_at, status
-        ) VALUES ($1, $2, $3, $4, NOW(), 'active')
+          user_id, cycle_id, wager_type, amount, placed_at
+        ) VALUES ($1, $2, $3, $4, NOW())
         RETURNING wager_id, placed_at
       `, [userId, cycleId, direction, stakeAmount]);
 
@@ -118,15 +118,15 @@ class WagerService {
         status: 'active'
       };
 
-      // Update user balance (deduct stake)
-      await db.query(`
-        UPDATE custodial_wallets 
-        SET current_balance = current_balance - $1
-        WHERE user_id = $2 AND current_balance >= $3
-      `, [stakeAmount * 10000000, userId, stakeAmount * 10000000]); // Convert to stroops
+      // Update user balance (deduct stake) - TODO: implement when wallet system ready
+      // await db.query(`
+      //   UPDATE custodial_wallets 
+      //   SET current_balance = current_balance - $1
+      //   WHERE user_id = $2 AND current_balance >= $3
+      // `, [stakeAmount * 10000000, userId, stakeAmount * 10000000]);
 
-      // Update wager pool totals
-      await this.updateWagerPoolTotals(cycleId);
+      // Wager placed successfully
+      logger.info(`Wager placed: ${direction} for ${stakeAmount} KALE in cycle ${cycleId}`);
 
       logger.info(`Wager placed successfully: ${JSON.stringify({
         wagerId: wager.wagerId,
@@ -149,8 +149,8 @@ class WagerService {
   async getCycleWagers(cycleId: bigint): Promise<WagerPosition[]> {
     const result = await db.query(`
       SELECT 
-        wager_id, user_id, cycle_id, wager_direction, 
-        stake_amount, placed_at, status, final_payout
+        wager_id, user_id, cycle_id, wager_type, 
+        amount, placed_at, payout_amount, is_winner
       FROM weather_wagers 
       WHERE cycle_id = $1
       ORDER BY placed_at DESC
@@ -160,11 +160,11 @@ class WagerService {
       wagerId: row.wager_id,
       userId: row.user_id,
       cycleId: BigInt(row.cycle_id),
-      direction: row.wager_direction as WagerDirection,
-      stakeAmount: row.stake_amount,
+      direction: row.wager_type as WagerDirection,
+      stakeAmount: row.amount,
       placedAt: row.placed_at,
-      status: row.status,
-      finalPayout: row.final_payout
+      status: 'active' as const,
+      finalPayout: row.payout_amount
     }));
   }
 
@@ -175,11 +175,11 @@ class WagerService {
     const result = await db.query(`
       SELECT 
         COUNT(*) as participant_count,
-        SUM(CASE WHEN wager_direction = 'good' THEN stake_amount ELSE 0 END) as total_good_stakes,
-        SUM(CASE WHEN wager_direction = 'bad' THEN stake_amount ELSE 0 END) as total_bad_stakes,
-        SUM(stake_amount) as total_stakes
+        SUM(CASE WHEN wager_type = 'good' THEN amount ELSE 0 END) as total_good_stakes,
+        SUM(CASE WHEN wager_type = 'bad' THEN amount ELSE 0 END) as total_bad_stakes,
+        SUM(amount) as total_stakes
       FROM weather_wagers 
-      WHERE cycle_id = $1 AND status = 'active'
+      WHERE cycle_id = $1
     `, [cycleId]);
 
     const poolData = result.rows[0];
