@@ -251,6 +251,24 @@ LEFT JOIN (
 
 COMMENT ON VIEW user_balance_summary IS 'Comprehensive user balance view including custodial, staked, and pending amounts';
 
+-- Cycle Actions Table for real-time demo interactions
+CREATE TABLE cycle_actions (
+    action_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(user_id),
+    cycle_id BIGINT NOT NULL,
+    block_number BIGINT NOT NULL,
+    action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('agriculture', 'wager', 'stay')),
+    action_data JSONB NOT NULL DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    
+    UNIQUE(user_id, cycle_id, block_number)
+);
+
+CREATE INDEX idx_cycle_actions_cycle_block ON cycle_actions(cycle_id, block_number);
+CREATE INDEX idx_cycle_actions_user_cycle ON cycle_actions(user_id, cycle_id);
+
+COMMENT ON TABLE cycle_actions IS 'Real-time user actions during weather farming cycles for demo';
+
 -- Grant permissions (adjust as needed for your deployment)
 -- GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA public TO kale_weather_app;
 -- GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO kale_weather_app;
