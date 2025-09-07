@@ -168,11 +168,37 @@ class WeatherFarmingDemo {
 
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    console.log(chalk.yellow(`🎰 ${bob.username} betting on weather...`));
+    console.log(chalk.yellow(`🎰 ${bob.username} betting on GOOD weather...`));
     await this.submitUserAction(bob.userId, 'wager', {
       wagerType: 'good',
       wagerAmount: 50
     });
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    console.log(chalk.yellow(`🎰 ${charlie.username} betting on BAD weather...`));
+    await this.submitUserAction(charlie.userId, 'wager', {
+      wagerType: 'bad',
+      wagerAmount: 30
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Show wager pool status
+    try {
+      const poolResponse = await axios.get(`${API_BASE}/wagers/current-pool`);
+      if (poolResponse.data.success) {
+        const pool = poolResponse.data.data.pool;
+        console.log(chalk.cyan('\n📊 WAGER POOL STATUS:'));
+        console.log(chalk.white(`   Good Weather Bets: ${pool.totalGoodStakes} KALE`));
+        console.log(chalk.white(`   Bad Weather Bets: ${pool.totalBadStakes} KALE`));
+        console.log(chalk.white(`   Total Pool: ${pool.totalStakes} KALE`));
+        console.log(chalk.white(`   Bet Influence: ${pool.betInfluence > 0 ? '+' : ''}${pool.betInfluence.toFixed(2)}`));
+        console.log(chalk.white(`   Dominant Side: ${pool.dominantSide || 'Balanced'}`));
+      }
+    } catch (error) {
+      console.log(chalk.gray('Wager pool data not available yet'));
+    }
 
     console.log(chalk.green('✅ Planting phase completed'));
     await this.displayCycleStatus();
@@ -224,11 +250,51 @@ class WeatherFarmingDemo {
   }
 
   private async demonstrateRevealingPhase(): Promise<void> {
-    console.log(chalk.green.bold('\n🎭 PHASE 3: REVEALING'));
+    console.log(chalk.green.bold('\n🎭 PHASE 3: REVEALING - Complete Weather Resolution'));
     await this.waitForPhase('revealing');
 
-    console.log(chalk.blue('📊 DAO weather consensus in progress...'));
-    console.log(chalk.green('✅ Consensus reached'));
+    console.log(chalk.blue('🧮 COMPREHENSIVE WEATHER CALCULATION IN PROGRESS...'));
+    console.log(chalk.gray('   🎯 Step 1: Gathering DAO consensus (Bull, Bear, Technical, Sentiment)'));
+    console.log(chalk.gray('   🌤️  Step 2: Analyzing real weather data for selected location'));
+    console.log(chalk.gray('   📊 Step 3: Processing community wager influence'));
+    console.log(chalk.gray('   ⚡ Step 4: Applying final weather formula'));
+    
+    await new Promise(resolve => setTimeout(resolve, 4000));
+
+    // Try to get comprehensive weather calculation
+    try {
+      const calcResponse = await axios.get(`${API_BASE}/weather-calculation/current`);
+      if (calcResponse.data.success) {
+        const calc = calcResponse.data.data;
+        
+        console.log(chalk.cyan('\n🧮 FINAL WEATHER CALCULATION RESULTS:'));
+        console.log(chalk.white(`   🌦️  Final Outcome: ${calc.weatherOutcome} WEATHER`));
+        console.log(chalk.white(`   📊 Final Score: ${calc.finalScore}/100`));
+        console.log(chalk.white(`   🎯 Confidence: ${(calc.confidence * 100).toFixed(1)}%`));
+        
+        console.log(chalk.yellow('\n📋 COMPONENT BREAKDOWN:'));
+        console.log(chalk.white(`   🎯 DAO Consensus: ${calc.components.daoConsensus.score.toFixed(1)} (weight: ${calc.components.daoConsensus.weight})`));
+        console.log(chalk.white(`   🌤️  Real Weather: ${calc.components.realWeather.score.toFixed(1)} (weight: ${calc.components.realWeather.weight})`));
+        console.log(chalk.white(`   📊 Wager Influence: ${calc.components.communityWagers.score.toFixed(1)} (weight: ${calc.components.communityWagers.weight})`));
+        
+        console.log(chalk.blue(`\n🔢 FORMULA: ${calc.formula.calculation}`));
+        console.log(chalk.gray(`   Location: ${calc.metadata.location || 'Unknown'}`));
+        
+        // Show which side won wagers
+        if (calc.components.communityWagers.wagerData) {
+          const wagerData = calc.components.communityWagers.wagerData;
+          const winnerSide = calc.weatherOutcome === 'GOOD' ? 'GOOD' : 'BAD';
+          console.log(chalk.yellow(`\n💰 WAGER RESULTS: ${winnerSide} weather bettors win!`));
+          console.log(chalk.white(`   Prize Pool: ${wagerData.totalStakes} KALE`));
+          console.log(chalk.white(`   Winners: ${winnerSide === 'GOOD' ? 'Good' : 'Bad'} weather bettors`));
+        }
+      }
+      
+    } catch (error) {
+      console.log(chalk.gray('Weather calculation still in progress...'));
+    }
+
+    console.log(chalk.green('✅ Weather resolution completed'));
   }
 
   private async demonstrateSettlingPhase(): Promise<void> {

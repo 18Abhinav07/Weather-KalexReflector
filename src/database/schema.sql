@@ -56,6 +56,11 @@ CREATE TABLE weather_cycles (
     weather_fetched_at TIMESTAMP WITH TIME ZONE, -- When weather was fetched
     weather_fetch_error TEXT, -- Error message if weather fetch failed
     
+    -- Final weather resolution (calculated during revealing phase)
+    final_weather_score DECIMAL(5,2), -- Final combined score (0.00-100.00)
+    dao_consensus_data JSONB, -- DAO voting results and bet influence data
+    weather_resolved_at TIMESTAMP WITH TIME ZONE, -- When weather was finally resolved
+    
     total_participants INTEGER DEFAULT 0,
     total_stake_amount BIGINT DEFAULT 0, -- Total KALE staked in cycle
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -131,6 +136,23 @@ CREATE TABLE balance_snapshots (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Weather Wagers Table: Community betting system per SRS
+CREATE TABLE weather_wagers (
+    wager_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    cycle_id BIGINT NOT NULL REFERENCES weather_cycles(cycle_id) ON DELETE CASCADE,
+    wager_direction VARCHAR(10) NOT NULL CHECK (wager_direction IN ('good', 'bad')),
+    stake_amount BIGINT NOT NULL CHECK (stake_amount > 0), -- KALE staked in stroops
+    final_payout BIGINT DEFAULT 0 CHECK (final_payout >= 0), -- Final payout in KALE stroops
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'settled', 'cancelled')),
+    placed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    settled_at TIMESTAMP WITH TIME ZONE,
+    
+    -- Business constraints
+    CONSTRAINT weather_wagers_unique_user_cycle UNIQUE (user_id, cycle_id), -- One wager per user per cycle
+    CONSTRAINT weather_wagers_stake_positive CHECK (stake_amount > 0)
+);
+
 -- Performance Indexes
 CREATE INDEX idx_users_main_wallet ON users(main_wallet_address);
 CREATE INDEX idx_users_custodial_wallet ON users(custodial_wallet_address);
@@ -141,6 +163,9 @@ CREATE INDEX idx_farm_positions_user_cycle ON farm_positions(user_id, cycle_id);
 CREATE INDEX idx_farm_positions_status ON farm_positions(status);
 CREATE INDEX idx_plant_requests_status ON plant_requests(status);
 CREATE INDEX idx_plant_requests_target_block ON plant_requests(target_block);
+CREATE INDEX idx_weather_wagers_user_cycle ON weather_wagers(user_id, cycle_id);
+CREATE INDEX idx_weather_wagers_cycle_status ON weather_wagers(cycle_id, status);
+CREATE INDEX idx_weather_wagers_direction ON weather_wagers(wager_direction);
 CREATE INDEX idx_transaction_log_user_type ON transaction_log(user_id, transaction_type);
 CREATE INDEX idx_transaction_log_created ON transaction_log(created_at);
 CREATE INDEX idx_balance_snapshots_user_created ON balance_snapshots(user_id, created_at);

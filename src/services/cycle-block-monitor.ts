@@ -8,6 +8,7 @@ import { db } from '../database/connection';
 import { DAOApiController } from '../api/dao-endpoints';
 import LocationSelector, { LocationSelectionResult } from './locationSelector.js';
 import WeatherApiService, { WeatherApiResult } from './weatherApiService.js';
+import WeatherResolutionService from './weatherResolutionService.js';
 import logger from '../utils/logger.js';
 
 export interface CycleInfo {
@@ -39,6 +40,7 @@ export class CycleBlockMonitor extends EventEmitter {
   private daoController: DAOApiController;
   private locationSelector: LocationSelector;
   private weatherApiService: WeatherApiService;
+  private weatherResolutionService: WeatherResolutionService;
   private isRunning = false;
   private monitorInterval: NodeJS.Timeout | null = null;
   private currentBlock = 0n;
@@ -75,6 +77,7 @@ export class CycleBlockMonitor extends EventEmitter {
 
     this.locationSelector = new LocationSelector();
     this.weatherApiService = new WeatherApiService();
+    this.weatherResolutionService = new WeatherResolutionService();
 
     console.log('[CycleBlockMonitor] Initialized with cycle config:', {
       cycleLength: this.CYCLE_LENGTH,
@@ -266,61 +269,87 @@ export class CycleBlockMonitor extends EventEmitter {
    * Handle revealing phase (block 9) - DAO vote reveal
    */
   private async handleRevealingPhase(): Promise<void> {
-    console.log('[CycleBlockMonitor] 🎭 Entering REVEALING phase - Revealing DAO votes');
+    console.log('[CycleBlockMonitor] 🎭 Entering REVEALING phase - Complete weather resolution');
     
     if (!this.currentCycle) return;
 
     try {
-      // Reveal DAO votes for weather determination
-      const daoResult = await this.daoController.calculateVotes({
-        body: { blockIndex: Number(this.currentCycle.endBlock - 1n) }
-      } as any, {} as any);
+      logger.info(`Starting comprehensive weather resolution for cycle ${this.currentCycle.cycleId}`);
+      
+      // Use the complete weather resolution service that combines:
+      // - DAO consensus (weighted voting)
+      // - Real weather data (if available)
+      // - Community bet influence from wagers
+      const weatherResolution = await this.weatherResolutionService.resolveWeatherForCycle(
+        this.currentCycle.cycleId
+      );
 
-      if (daoResult && daoResult.consensusResult) {
-        console.log(`[CycleBlockMonitor] 🌦️ Weather revealed: ${daoResult.consensusResult.finalWeather}`);
-        
-        // Store weather outcome
-        await db.query(`
-          UPDATE weather_cycles 
-          SET current_state = 'revealing',
-              weather_outcome = $1,
-              weather_confidence = $2
-          WHERE cycle_id = $3
-        `, [
-          daoResult.consensusResult.finalWeather,
-          daoResult.analysis?.agreement || 0.5,
-          this.currentCycle.cycleId
-        ]);
+      logger.info(`Weather resolution completed for cycle ${this.currentCycle.cycleId}: ${JSON.stringify({
+        outcome: weatherResolution.weatherOutcome,
+        finalScore: weatherResolution.finalWeatherScore,
+        confidence: weatherResolution.confidence,
+        hasRealWeather: weatherResolution.formula.withRealWeather
+      })}`);
 
-        this.emit('weatherRevealed', {
-          cycle: this.currentCycle,
-          weather: daoResult.consensusResult.finalWeather,
-          confidence: daoResult.analysis?.agreement || 0.5,
-          consensusScore: daoResult.consensusResult.consensusScore
-        });
-      }
+      // Update cycle state
+      await db.query(`
+        UPDATE weather_cycles 
+        SET current_state = 'revealing'
+        WHERE cycle_id = $1
+      `, [this.currentCycle.cycleId]);
 
-    } catch (error) {
-      console.error('[CycleBlockMonitor] Failed to reveal weather:', error);
+      // Emit comprehensive weather resolution event
+      this.emit('weatherResolved', {
+        cycle: this.currentCycle,
+        resolution: weatherResolution,
+        block: this.currentBlock
+      });
+
+    } catch (error: any) {
+      logger.error(`Failed to resolve weather for cycle ${this.currentCycle.cycleId}: ${error.message}`);
       this.emit('weatherRevealError', { cycle: this.currentCycle, error });
     }
   }
 
   /**
-   * Handle settling phase (block 10+) - Harvest and settlement
+   * Handle settling phase (block 10+) - Complete cycle settlement including wager payouts
    */
   private async handleSettlingPhase(): Promise<void> {
-    console.log('[CycleBlockMonitor] 💰 Entering SETTLING phase');
+    console.log('[CycleBlockMonitor] 💰 Entering SETTLING phase - Processing settlements and payouts');
     
-    // Trigger harvest and settlement
-    this.emit('settlingPhaseStarted', this.currentCycle);
-    
-    if (this.currentCycle) {
+    if (!this.currentCycle) return;
+
+    try {
+      // Update cycle state
       await db.query(`
         UPDATE weather_cycles 
         SET current_state = 'settling'
         WHERE cycle_id = $1
       `, [this.currentCycle.cycleId]);
+
+      logger.info(`Starting complete settlement for cycle ${this.currentCycle.cycleId}`);
+
+      // Process complete settlement including wager payouts
+      const settlement = await this.weatherResolutionService.settleCycle(this.currentCycle.cycleId);
+
+      logger.info(`Cycle ${this.currentCycle.cycleId} settlement completed: ${JSON.stringify({
+        outcome: settlement.weatherResolution.weatherOutcome,
+        totalWagers: settlement.settlementSummary.totalWagers,
+        winners: settlement.settlementSummary.winners,
+        volume: settlement.settlementSummary.totalVolume
+      })}`);
+
+      // Emit settlement events
+      this.emit('settlingPhaseStarted', this.currentCycle);
+      this.emit('cycleSettled', {
+        cycle: this.currentCycle,
+        settlement,
+        block: this.currentBlock
+      });
+
+    } catch (error: any) {
+      logger.error(`Failed to settle cycle ${this.currentCycle.cycleId}: ${error.message}`);
+      this.emit('settlementError', { cycle: this.currentCycle, error });
     }
   }
 
