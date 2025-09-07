@@ -76,7 +76,7 @@ try {
         const blockEntropy = Math.random().toString(36).substring(2, 18); // Mock entropy
         
         console.log(chalk.dim(`\n--- Test Voting Cycle ${blockIndex} ---`));
-        const result = await system.performVotingCycle(blockIndex, blockEntropy);
+        const result = await system.performVotingCycleWithEntropy(blockIndex, blockEntropy);
         console.log(chalk.green(`✅ Test cycle completed: ${result.finalWeather === 1 ? 'GOOD' : 'BAD'} weather`));
       } catch (error) {
         console.error(chalk.red('❌ Test voting cycle failed:'), error);

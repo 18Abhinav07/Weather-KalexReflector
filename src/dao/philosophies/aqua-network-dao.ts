@@ -1,8 +1,10 @@
 // AQUA Network DAO Philosophy
 // AQUA/USDC price trend. GOOD if AQUA network showing strength vs stablecoins
 
-import { DAOPhilosophy } from '../dao-registry';
-import { OracleAssetData, DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
+// AQUA Network DAO Philosophy
+// AQUA/USDC price trend. GOOD if AQUA network showing strength vs stablecoins
+import type { DAOPhilosophy } from '../dao-registry';
+import { type OracleAssetData, type DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
 
 export class AquaNetworkDAO implements DAOPhilosophy {
   

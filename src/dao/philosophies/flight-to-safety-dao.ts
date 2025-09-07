@@ -1,8 +1,10 @@
 // Flight to Safety DAO Philosophy  
 // USDT/USDC vs crypto correlation. GOOD if stablecoins outperforming (safe haven flow)
 
-import { DAOPhilosophy } from '../dao-registry';
-import { OracleAssetData, DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
+// Flight to Safety DAO Philosophy  
+// USDT/USDC vs crypto correlation. GOOD if stablecoins outperforming (safe haven flow)
+import type { DAOPhilosophy } from '../dao-registry';
+import { type OracleAssetData, type DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
 
 export class FlightToSafetyDAO implements DAOPhilosophy {
   

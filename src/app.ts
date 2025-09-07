@@ -5,6 +5,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import { EnvironmentValidator } from './utils/env-validator';
 import { weatherFarmingRoutes } from './api/routes';
 import { farmingAutomationEngine } from './services/farming-automation-engine';
 import { depositMonitor } from './services/deposit-monitor';
@@ -155,6 +156,18 @@ export class WeatherFarmingServer {
     try {
       console.log('[Server] Starting Weather Farming System...');
 
+      // Validate environment variables
+      console.log('[Server] Validating environment configuration...');
+      const envValidation = EnvironmentValidator.validate();
+      EnvironmentValidator.printResults(envValidation);
+      
+      if (!envValidation.valid) {
+        console.error('[Server] ❌ Environment validation failed - server startup aborted');
+        process.exit(1);
+      }
+      
+      console.log('[Server] ✅ Environment validation passed');
+
       // Initialize database connection
       console.log('[Server] Connecting to database...');
       // Database connection is handled by the db module
@@ -231,7 +244,7 @@ export class WeatherFarmingServer {
       }
 
       // Close database connections
-      await db.end();
+      await db.close();
 
       console.log('[Server] ✅ Graceful shutdown completed');
       process.exit(0);

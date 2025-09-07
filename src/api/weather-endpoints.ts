@@ -1,7 +1,8 @@
-import { Request, Response } from 'express';
+import { type Request, type Response } from 'express';
 import { db } from '../database/connection.js';
 import WeatherApiService from '../services/weatherApiService.js';
 import LocationSelector from '../services/locationSelector.js';
+import { convertLegacyScore } from '../types/weather.js';
 import logger from '../utils/logger.js';
 
 class WeatherApiController {
@@ -59,7 +60,7 @@ class WeatherApiController {
           precipitation: 0,
           overall: parseFloat(cycle.weather_score)
         };
-        weatherInterpretation = this.weatherService.getWeatherInterpretation(score);
+        weatherInterpretation = this.weatherService.getWeatherInterpretation(convertLegacyScore(score));
       }
 
       res.json({
@@ -117,7 +118,7 @@ class WeatherApiController {
         LIMIT $1
       `, [limit]);
 
-      const history = result.rows.map(cycle => ({
+      const history = result.rows.map((cycle: any) => ({
         cycleId: cycle.cycle_id,
         location: cycle.revealed_location_name,
         weather: cycle.current_weather_data,
@@ -250,17 +251,17 @@ class WeatherApiController {
 
       const weatherResult = await this.weatherService.fetchWeatherForLocation(location);
       
-      if (weatherResult.success && weatherResult.data && weatherResult.score) {
-        const interpretation = this.weatherService.getWeatherInterpretation(weatherResult.score);
+      if (weatherResult.success && weatherResult.weather) {
+        const interpretation = this.weatherService.getWeatherInterpretation(weatherResult.weather);
         
         res.json({
           success: true,
           data: {
             location,
-            weather: weatherResult.data,
-            score: weatherResult.score,
+            weather: weatherResult.weather.data,
+            score: weatherResult.weather.score,
             interpretation,
-            source: weatherResult.source
+            source: weatherResult.weather.source
           }
         });
       } else {

@@ -1,8 +1,10 @@
 // Mean Reversion DAO Philosophy
 // Compares current prices to 1-hour average. GOOD if prices reverting to mean
 
-import { DAOPhilosophy } from '../dao-registry';
-import { OracleAssetData, DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
+// Mean Reversion DAO Philosophy
+// Compares current prices to 1-hour average. GOOD if prices reverting to mean
+import type { DAOPhilosophy } from '../dao-registry';
+import { type OracleAssetData, type DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
 
 export class MeanReversionDAO implements DAOPhilosophy {
   

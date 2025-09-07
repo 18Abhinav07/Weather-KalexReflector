@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
-import LocationSelector, { Location, LocationSelectionResult } from '../services/locationSelector.js';
+import LocationSelector, { type Location, type LocationSelectionResult } from '../services/locationSelector.js';
 
 describe('LocationSelector', () => {
   let locationSelector: LocationSelector;

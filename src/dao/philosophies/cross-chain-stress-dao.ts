@@ -1,8 +1,10 @@
 // Cross-Chain Stress DAO Philosophy
 // Multi-blockchain stress indicators. GOOD if cross-chain assets stable
 
-import { DAOPhilosophy } from '../dao-registry';
-import { OracleAssetData, DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
+// Cross-Chain Stress DAO Philosophy
+// Multi-blockchain stress indicators. GOOD if cross-chain assets stable
+import type { DAOPhilosophy } from '../dao-registry';
+import { type OracleAssetData, type DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
 
 export class CrossChainStressDAO implements DAOPhilosophy {
   

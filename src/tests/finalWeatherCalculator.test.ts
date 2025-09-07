@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, mock, spyOn } from 'bun:test';
 import FinalWeatherCalculator, { 
-  FinalWeatherCalculation, 
-  WeatherComponent 
+  type FinalWeatherCalculation, 
+  type WeatherComponent 
 } from '../services/finalWeatherCalculator.js';
 import { db } from '../database/connection.js';
 import WeatherApiService from '../services/weatherApiService.js';

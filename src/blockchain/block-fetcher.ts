@@ -3,7 +3,7 @@
 
 import { scValToNative, xdr } from '@stellar/stellar-sdk';
 import { Server, Durability } from '@stellar/stellar-sdk/rpc';
-import { KaleBlock, KalePail, ContractData } from './block-types';
+import type { KaleBlock, KalePail, ContractData } from './block-types';
 
 export class BlockDataFetcher {
   private rpcServer: Server;

@@ -1,7 +1,7 @@
 // Cycle Management API Endpoints
 // Real-time cycle interaction for demo
 
-import { Request, Response } from 'express';
+import { type Request, type Response } from 'express';
 import { cycleBlockMonitor, CyclePhase } from '../services/cycle-block-monitor';
 import { db } from '../database/connection';
 
@@ -178,7 +178,7 @@ export class CycleAPI {
             phase: cycle.phase,
             currentBlock: cycle.currentBlock.toString()
           },
-          actions: actions.rows.map(row => ({
+          actions: actions.rows.map((row: any) => ({
             block: row.block_number,
             actionType: row.action_type,
             actionData: row.action_data,
@@ -245,7 +245,7 @@ export class CycleAPI {
           weatherConfidence: cycle.weather_confidence,
           cycleState: cycle.current_state,
           completedAt: cycle.completed_at,
-          participants: participants.rows.map(p => ({
+          participants: participants.rows.map((p: any) => ({
             userId: p.user_id,
             actionType: p.action_type,
             actionData: p.action_data,
@@ -359,7 +359,7 @@ export class CycleAPI {
         status: 'planted'
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -376,7 +376,7 @@ export class CycleAPI {
         status: 'placed'
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 

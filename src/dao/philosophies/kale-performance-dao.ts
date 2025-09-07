@@ -1,8 +1,10 @@
 // KALE Performance DAO Philosophy
 // Tracks KALE/USDC price trend. GOOD if KALE up >2% in 15min, BAD if down >2%
 
-import { DAOPhilosophy } from '../dao-registry';
-import { OracleAssetData, DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
+// KALE Performance DAO Philosophy
+// Tracks KALE/USDC price trend. GOOD if KALE up >2% in 15min, BAD if down >2%
+import type { DAOPhilosophy } from '../dao-registry';
+import { type OracleAssetData, type DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
 
 export class KalePerformanceDAO implements DAOPhilosophy {
   

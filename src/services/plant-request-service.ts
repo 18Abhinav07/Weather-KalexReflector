@@ -157,7 +157,7 @@ export class PlantRequestService extends EventEmitter {
         ORDER BY submitted_at ASC
       `, [blockNumber]);
 
-      return result.rows.map(row => ({
+      return result.rows.map((row: any) => ({
         requestId: row.request_id,
         userId: row.user_id,
         cycleId: BigInt(row.cycle_id),
@@ -262,7 +262,7 @@ export class PlantRequestService extends EventEmitter {
         LIMIT $2
       `, [userId, limit]);
 
-      return result.rows.map(row => ({
+      return result.rows.map((row: any) => ({
         requestId: row.request_id,
         userId: row.user_id,
         cycleId: BigInt(row.cycle_id),
@@ -349,7 +349,7 @@ export class PlantRequestService extends EventEmitter {
         ORDER BY start_block ASC
       `);
 
-      return result.rows.map(row => ({
+      return result.rows.map((row: any) => ({
         cycleId: BigInt(row.cycle_id),
         startBlock: BigInt(row.start_block),
         endBlock: BigInt(row.end_block),
@@ -430,11 +430,11 @@ export class PlantRequestService extends EventEmitter {
   private async validatePlantRequest(request: PlantRequest): Promise<{ valid: boolean; error?: string }> {
     // Validate stake amount
     if (request.stakeAmount < this.MIN_STAKE_AMOUNT) {
-      return { valid: false, error: `Minimum stake amount is ${this.MIN_STAKE_AMOUNT / 10**7} KALE` };
+      return { valid: false, error: `Minimum stake amount is ${Number(this.MIN_STAKE_AMOUNT) / 10**7} KALE` };
     }
 
     if (request.stakeAmount > this.MAX_STAKE_AMOUNT) {
-      return { valid: false, error: `Maximum stake amount is ${this.MAX_STAKE_AMOUNT / 10**7} KALE` };
+      return { valid: false, error: `Maximum stake amount is ${Number(this.MAX_STAKE_AMOUNT) / 10**7} KALE` };
     }
 
     // Check if cycle exists and is active

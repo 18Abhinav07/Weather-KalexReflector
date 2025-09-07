@@ -1,7 +1,7 @@
 // DAO Registry - Manages all DAO configurations and voting logic
 // Based on DAOCreation.md specifications
 
-import { DAOConfig, DAOVote, WeatherOutcome, OracleAssetData, DAOAnalysis } from '../types/oracle-types';
+import { type DAOConfig, type DAOVote, WeatherOutcome, type OracleAssetData, type DAOAnalysis } from '../types/oracle-types';
 
 export interface DAOPhilosophy {
   analyze(data: OracleAssetData): DAOAnalysis;

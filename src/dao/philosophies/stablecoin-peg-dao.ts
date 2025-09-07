@@ -1,8 +1,10 @@
 // Stablecoin Peg DAO Philosophy
 // USDT/USDC deviation from $1.00. GOOD if stablecoins maintaining peg (market stability)
 
-import { DAOPhilosophy } from '../dao-registry';
-import { OracleAssetData, DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
+// Stablecoin Peg DAO Philosophy
+// USDT/USDC deviation from $1.00. GOOD if stablecoins maintaining peg (market stability)
+import type { DAOPhilosophy } from '../dao-registry';
+import { type OracleAssetData, type DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
 
 export class StablecoinPegDAO implements DAOPhilosophy {
   

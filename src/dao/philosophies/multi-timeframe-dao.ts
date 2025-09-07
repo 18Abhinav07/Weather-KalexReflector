@@ -1,8 +1,10 @@
 // Multi-Timeframe DAO Philosophy
 // 5min vs 15min vs 1hour trend comparison. GOOD if trends align across timeframes
 
-import { DAOPhilosophy } from '../dao-registry';
-import { OracleAssetData, DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
+// Multi-Timeframe DAO Philosophy
+// 5min vs 15min vs 1hour trend comparison. GOOD if trends align across timeframes
+import type { DAOPhilosophy } from '../dao-registry';
+import { type OracleAssetData, type DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
 
 export class MultiTimeframeDAO implements DAOPhilosophy {
   

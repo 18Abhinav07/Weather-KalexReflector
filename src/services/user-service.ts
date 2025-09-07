@@ -313,7 +313,7 @@ export class UserService {
         LIMIT $1 OFFSET $2
       `, [limit, offset]);
 
-      return result.rows.map(row => ({
+      return result.rows.map((row: any) => ({
         userId: row.user_id,
         mainWalletAddress: row.main_wallet_address,
         custodialWalletAddress: row.custodial_wallet_address,

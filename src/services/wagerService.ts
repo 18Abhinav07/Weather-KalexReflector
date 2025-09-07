@@ -1,51 +1,20 @@
 import { db } from '../database/connection.js';
 import logger from '../utils/logger.js';
+import {
+  WagerDirection,
+  type WagerPosition,
+  type WagerPool,
+  type WagerInfluenceResult,
+  type WagerPayoutResult
+} from '../types/wager.js';
 
-export enum WagerDirection {
-  BET_GOOD = 'good',
-  BET_BAD = 'bad'
-}
-
-export interface WagerPosition {
-  wagerId: string;
-  userId: string;
-  cycleId: bigint;
-  direction: WagerDirection;
-  stakeAmount: number;
-  placedAt: Date;
-  status: 'active' | 'settled' | 'cancelled';
-  finalPayout?: number;
-}
-
-export interface WagerPool {
-  cycleId: bigint;
-  totalGoodStakes: number;
-  totalBadStakes: number;
-  totalStakes: number;
-  betInfluence: number;
-  dominantSide: WagerDirection | null;
-  influenceStrength: number;
-  participantCount: number;
-}
-
-export interface WagerInfluenceResult {
-  betInfluence: number; // -2.0 to +2.0 range
-  totalStakes: number;
-  goodStakes: number;
-  badStakes: number;
-  dominantSide: WagerDirection | null;
-  stakeRatio: number;
-  influenceStrength: number;
-}
-
-export interface WagerPayoutResult {
-  wagerId: string;
-  userId: string;
-  originalStake: number;
-  payout: number;
-  profitLoss: number;
-  payoutRatio: number;
-}
+export { WagerDirection } from '../types/wager.js';
+export type {
+  WagerPosition,
+  WagerPool,
+  WagerInfluenceResult,
+  WagerPayoutResult
+} from '../types/wager.js';
 
 class WagerService {
   constructor() {
@@ -156,7 +125,7 @@ class WagerService {
       ORDER BY placed_at DESC
     `, [cycleId]);
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       wagerId: row.wager_id,
       userId: row.user_id,
       cycleId: BigInt(row.cycle_id),
@@ -307,7 +276,7 @@ class WagerService {
         // Update database
         await db.query(`
           UPDATE weather_wagers 
-          SET status = 'settled', final_payout = $1
+          SET payout_amount = $1, is_winner = true
           WHERE wager_id = $2
         `, [payout, winner.wagerId]);
 
@@ -339,7 +308,7 @@ class WagerService {
       for (const loser of losers) {
         await db.query(`
           UPDATE weather_wagers 
-          SET status = 'settled', final_payout = 0
+          SET payout_amount = 0, is_winner = false
           WHERE wager_id = $1
         `, [loser.wagerId]);
 
@@ -378,12 +347,12 @@ class WagerService {
         total_participants = (
           SELECT COUNT(DISTINCT user_id) 
           FROM weather_wagers 
-          WHERE cycle_id = $1 AND status = 'active'
+          WHERE cycle_id = $1
         ),
         total_stake_amount = (
-          SELECT COALESCE(SUM(stake_amount), 0) 
+          SELECT COALESCE(SUM(amount), 0) 
           FROM weather_wagers 
-          WHERE cycle_id = $1 AND status = 'active'
+          WHERE cycle_id = $1
         )
       WHERE cycle_id = $1
     `, [cycleId]);
@@ -395,25 +364,23 @@ class WagerService {
   async getUserWagerHistory(userId: string, limit: number = 10): Promise<WagerPosition[]> {
     const result = await db.query(`
       SELECT 
-        w.wager_id, w.user_id, w.cycle_id, w.wager_direction, 
-        w.stake_amount, w.placed_at, w.status, w.final_payout,
-        wc.weather_outcome
+        w.wager_id, w.user_id, w.cycle_id, w.wager_type, 
+        w.amount, w.placed_at, w.payout_amount
       FROM weather_wagers w
-      LEFT JOIN weather_cycles wc ON w.cycle_id = wc.cycle_id
       WHERE w.user_id = $1
       ORDER BY w.placed_at DESC
       LIMIT $2
     `, [userId, limit]);
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       wagerId: row.wager_id,
       userId: row.user_id,
       cycleId: BigInt(row.cycle_id),
-      direction: row.wager_direction as WagerDirection,
-      stakeAmount: row.stake_amount,
+      direction: row.wager_type as WagerDirection,
+      stakeAmount: row.amount,
       placedAt: row.placed_at,
-      status: row.status,
-      finalPayout: row.final_payout
+      status: 'active' as const,
+      finalPayout: row.payout_amount
     }));
   }
 
@@ -424,11 +391,11 @@ class WagerService {
     const result = await db.query(`
       SELECT 
         COUNT(*) as total_wagers,
-        COUNT(CASE WHEN status = 'settled' AND final_payout > stake_amount THEN 1 END) as winning_wagers,
-        COUNT(CASE WHEN status = 'settled' AND final_payout = 0 THEN 1 END) as losing_wagers,
-        AVG(stake_amount) as average_stake,
-        SUM(stake_amount) as total_volume,
-        SUM(CASE WHEN status = 'settled' THEN final_payout ELSE 0 END) as total_payouts,
+        COUNT(CASE WHEN payout_amount > amount THEN 1 END) as winning_wagers,
+        COUNT(CASE WHEN payout_amount = 0 THEN 1 END) as losing_wagers,
+        AVG(amount) as average_stake,
+        SUM(amount) as total_volume,
+        SUM(COALESCE(payout_amount, 0)) as total_payouts,
         COUNT(DISTINCT user_id) as unique_wagerers,
         COUNT(DISTINCT cycle_id) as cycles_with_wagers
       FROM weather_wagers

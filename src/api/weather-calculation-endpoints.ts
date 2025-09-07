@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { type Request, type Response } from 'express';
 import FinalWeatherCalculator from '../services/finalWeatherCalculator.js';
 import WeatherResolutionService from '../services/weatherResolutionService.js';
 import { db } from '../database/connection.js';

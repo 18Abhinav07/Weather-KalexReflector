@@ -1,6 +1,6 @@
-import axios, { AxiosResponse } from 'axios';
+import axios, { type AxiosResponse } from 'axios';
 import logger from '../utils/logger.js';
-import { Location } from './locationSelector.js';
+import type { Location } from './locationSelector.js';
 
 interface WeatherData {
   temperature: number;
@@ -12,21 +12,38 @@ interface WeatherData {
   timestamp: Date;
 }
 
-interface WeatherScore {
-  temperature: number;
-  humidity: number;
-  windSpeed: number;
-  precipitation: number;
-  overall: number;
-  normalized: number;
+export interface WeatherScore {
+  score: number;
+  factors: {
+    temperature: number;
+    humidity: number;
+    wind: number;
+    precipitation: number;
+  };
+  interpretation?: {
+    farmingOutlook: 'excellent' | 'good' | 'fair' | 'poor';
+    weatherCategory?: string;
+  };
 }
 
-interface WeatherApiResult {
+export interface WeatherApiResult {
   success: boolean;
-  data?: WeatherData;
-  score?: WeatherScore;
+  weather?: {
+    data: WeatherData;
+    score: number;
+    factors: {
+      temperature: number;
+      humidity: number;
+      wind: number;
+      precipitation: number;
+    };
+    source: string;
+    interpretation?: {
+      farmingOutlook: 'excellent' | 'good' | 'fair' | 'poor';
+      weatherCategory?: string;
+    };
+  };
   error?: string;
-  source: string;
 }
 
 interface KaleFarmingConditions {
@@ -99,21 +116,25 @@ class WeatherApiService {
         logger.info(`Weather API attempt ${i + 1}/3 for ${location.name}`);
         const result = await attempt();
         
-        if (result.success && result.data) {
-          logger.info(`Weather data obtained from ${result.source}: ${JSON.stringify({
+        if (result.success && result.weather) {
+          logger.info(`Weather data obtained from ${result.weather.source}: ${JSON.stringify({
             location: location.name,
-            temperature: result.data.temperature,
-            conditions: result.data.conditions
+            temperature: result.weather.data.temperature,
+            conditions: result.weather.data.conditions
           })}`);
           
           // Calculate kale farming score
-          const score = this.calculateKaleFarmingScore(result.data);
+          const score = this.calculateKaleFarmingScore(result.weather.data);
           
           return {
             success: true,
-            data: result.data,
-            score,
-            source: result.source
+            weather: {
+              data: result.weather.data,
+              score: score.score,
+              factors: score.factors,
+              source: result.weather.source,
+              interpretation: score.interpretation
+            }
           };
         }
         
@@ -130,8 +151,7 @@ class WeatherApiService {
     logger.error(`All weather APIs failed for ${location.name}`);
     return {
       success: false,
-      error: 'All weather APIs failed',
-      source: 'none'
+      error: 'All weather APIs failed'
     };
   }
 
@@ -163,8 +183,12 @@ class WeatherApiService {
 
     return {
       success: true,
-      data: weatherData,
-      source: api.name
+      weather: {
+        data: weatherData,
+        score: 0, // Will be calculated later
+        factors: { temperature: 0, humidity: 0, wind: 0, precipitation: 0 },
+        source: api.name
+      }
     };
   }
 
@@ -196,8 +220,12 @@ class WeatherApiService {
 
     return {
       success: true,
-      data: weatherData,
-      source: api.name
+      weather: {
+        data: weatherData,
+        score: 0, // Will be calculated later
+        factors: { temperature: 0, humidity: 0, wind: 0, precipitation: 0 },
+        source: api.name
+      }
     };
   }
 
@@ -230,15 +258,19 @@ class WeatherApiService {
 
     return {
       success: true,
-      data: weatherData,
-      source: api.name
+      weather: {
+        data: weatherData,
+        score: 0, // Will be calculated later
+        factors: { temperature: 0, humidity: 0, wind: 0, precipitation: 0 },
+        source: api.name
+      }
     };
   }
 
   /**
    * Calculate kale farming suitability score based on weather conditions
    */
-  private calculateKaleFarmingScore(weather: WeatherData): WeatherScore {
+  public calculateKaleFarmingScore(weather: WeatherData): WeatherScore {
     const conditions = this.KALE_CONDITIONS;
     
     // Score each component (0-100)
@@ -281,13 +313,25 @@ class WeatherApiService {
     // Normalize to 0-100 scale
     const normalized = Math.max(0, Math.min(100, overall));
 
+    // Determine farming outlook
+    let farmingOutlook: 'excellent' | 'good' | 'fair' | 'poor';
+    if (normalized >= 80) farmingOutlook = 'excellent';
+    else if (normalized >= 60) farmingOutlook = 'good'; 
+    else if (normalized >= 40) farmingOutlook = 'fair';
+    else farmingOutlook = 'poor';
+
     return {
-      temperature: tempScore,
-      humidity: humidityScore,
-      windSpeed: windScore,
-      precipitation: precipScore,
-      overall,
-      normalized
+      score: normalized,
+      factors: {
+        temperature: tempScore / 100,
+        humidity: humidityScore / 100,
+        wind: windScore / 100,
+        precipitation: precipScore / 100
+      },
+      interpretation: {
+        farmingOutlook,
+        weatherCategory: weather.conditions
+      }
     };
   }
 
@@ -316,7 +360,7 @@ class WeatherApiService {
     description: string;
     farmingOutlook: 'excellent' | 'good' | 'fair' | 'poor' | 'challenging';
   } {
-    const normalized = score.normalized;
+    const normalized = score.score;
     
     if (normalized >= 80) {
       return {
@@ -397,4 +441,4 @@ class WeatherApiService {
 }
 
 export default WeatherApiService;
-export { WeatherData, WeatherScore, WeatherApiResult };
+export type { WeatherData };

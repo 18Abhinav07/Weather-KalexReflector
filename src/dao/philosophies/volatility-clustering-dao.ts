@@ -1,8 +1,10 @@
 // Volatility Clustering DAO Philosophy
 // Standard deviation calculation over 15 minutes. GOOD if low volatility (stable market)
 
-import { DAOPhilosophy } from '../dao-registry';
-import { OracleAssetData, DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
+// Volatility Clustering DAO Philosophy
+// Standard deviation calculation over 15 minutes. GOOD if low volatility (stable market)
+import type { DAOPhilosophy } from '../dao-registry';
+import { type OracleAssetData, type DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
 
 export class VolatilityClusteringDAO implements DAOPhilosophy {
   

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, mock, spyOn } from 'bun:test';
-import WeatherApiService, { WeatherApiResult, WeatherScore } from '../services/weatherApiService.js';
-import { Location } from '../services/locationSelector.js';
+import WeatherApiService, { type WeatherApiResult, type WeatherScore } from '../services/weatherApiService.js';
+import type { Location } from '../services/locationSelector.js';
 import axios from 'axios';
 
 // Mock axios
@@ -21,24 +21,25 @@ describe('WeatherApiService', () => {
       name: 'Tokyo',
       country: 'Japan',
       coordinates: { lat: 35.6762, lon: 139.6503 },
-      populationWeight: 13.9
+      populationWeight: 13.9,
+      timezone: 'Asia/Tokyo'
     };
   });
 
   describe('Constructor', () => {
     it('should initialize with correct API keys and URLs', () => {
       expect(weatherApiService).toBeDefined();
-      expect(weatherApiService['openWeatherMapApiKey']).toBeDefined();
-      expect(weatherApiService['weatherApiKey']).toBeDefined();
-      expect(weatherApiService['visualCrossingApiKey']).toBeDefined();
+      expect((weatherApiService as any).openWeatherMapApiKey).toBeDefined();
+      expect((weatherApiService as any).weatherApiKey).toBeDefined();
+      expect((weatherApiService as any).visualCrossingApiKey).toBeDefined();
     });
 
     it('should have all three weather providers configured', () => {
       const service = new WeatherApiService();
-      expect(service['providers']).toHaveLength(3);
-      expect(service['providers'].map(p => p.name)).toContain('OpenWeatherMap');
-      expect(service['providers'].map(p => p.name)).toContain('WeatherAPI');
-      expect(service['providers'].map(p => p.name)).toContain('Visual Crossing');
+      expect((service as any).providers).toHaveLength(3);
+      expect((service as any).providers.map((p: any) => p.name)).toContain('OpenWeatherMap');
+      expect((service as any).providers.map((p: any) => p.name)).toContain('WeatherAPI');
+      expect((service as any).providers.map((p: any) => p.name)).toContain('Visual Crossing');
     });
   });
 
@@ -144,7 +145,9 @@ describe('WeatherApiService', () => {
         humidity: 70,
         conditions: 'partly cloudy',
         windSpeed: 8,
-        precipitation: 0
+        precipitation: 0,
+        source: 'test',
+        timestamp: new Date()
       };
 
       const score = weatherApiService.calculateKaleFarmingScore(idealWeather);
@@ -162,7 +165,9 @@ describe('WeatherApiService', () => {
         humidity: 50,
         conditions: 'clear',
         windSpeed: 5,
-        precipitation: 0
+        precipitation: 0,
+        source: 'test',
+        timestamp: new Date()
       };
 
       const coldWeather = {
@@ -170,7 +175,9 @@ describe('WeatherApiService', () => {
         humidity: 60,
         conditions: 'snow',
         windSpeed: 10,
-        precipitation: 2
+        precipitation: 2,
+        source: 'test',
+        timestamp: new Date()
       };
 
       const hotScore = weatherApiService.calculateKaleFarmingScore(hotWeather);
@@ -188,7 +195,9 @@ describe('WeatherApiService', () => {
         humidity: 95,
         conditions: 'thunderstorm',
         windSpeed: 40,
-        precipitation: 15
+        precipitation: 15,
+        source: 'test',
+        timestamp: new Date()
       };
 
       const score = weatherApiService.calculateKaleFarmingScore(stormWeather);
@@ -200,10 +209,10 @@ describe('WeatherApiService', () => {
     });
 
     it('should provide correct farming interpretations', () => {
-      const excellentWeather = { temperature: 15, humidity: 65, conditions: 'clear', windSpeed: 6, precipitation: 0 };
-      const goodWeather = { temperature: 18, humidity: 75, conditions: 'cloudy', windSpeed: 12, precipitation: 1 };
-      const fairWeather = { temperature: 22, humidity: 80, conditions: 'rain', windSpeed: 15, precipitation: 5 };
-      const poorWeather = { temperature: 30, humidity: 95, conditions: 'thunderstorm', windSpeed: 30, precipitation: 20 };
+      const excellentWeather = { temperature: 15, humidity: 65, conditions: 'clear', windSpeed: 6, precipitation: 0, source: 'test', timestamp: new Date() };
+      const goodWeather = { temperature: 18, humidity: 75, conditions: 'cloudy', windSpeed: 12, precipitation: 1, source: 'test', timestamp: new Date() };
+      const fairWeather = { temperature: 22, humidity: 80, conditions: 'rain', windSpeed: 15, precipitation: 5, source: 'test', timestamp: new Date() };
+      const poorWeather = { temperature: 30, humidity: 95, conditions: 'thunderstorm', windSpeed: 30, precipitation: 20, source: 'test', timestamp: new Date() };
 
       expect(weatherApiService.calculateKaleFarmingScore(excellentWeather).interpretation?.farmingOutlook).toBe('excellent');
       expect(weatherApiService.calculateKaleFarmingScore(goodWeather).interpretation?.farmingOutlook).toBe('good');
@@ -286,7 +295,9 @@ describe('WeatherApiService', () => {
         humidity: 60,
         conditions: 'sunny',
         windSpeed: 5,
-        precipitation: 0
+        precipitation: 0,
+        source: 'test',
+        timestamp: new Date()
       };
 
       expect(() => {
@@ -306,8 +317,8 @@ describe('WeatherApiService', () => {
     });
 
     it('should normalize extreme humidity values', () => {
-      const weather1 = { temperature: 20, humidity: 150, conditions: 'clear', windSpeed: 5, precipitation: 0 };
-      const weather2 = { temperature: 20, humidity: -10, conditions: 'clear', windSpeed: 5, precipitation: 0 };
+      const weather1 = { temperature: 20, humidity: 150, conditions: 'clear', windSpeed: 5, precipitation: 0, source: 'test', timestamp: new Date() };
+      const weather2 = { temperature: 20, humidity: -10, conditions: 'clear', windSpeed: 5, precipitation: 0, source: 'test', timestamp: new Date() };
 
       const score1 = weatherApiService.calculateKaleFarmingScore(weather1);
       const score2 = weatherApiService.calculateKaleFarmingScore(weather2);
@@ -354,7 +365,8 @@ describe.skip('WeatherApiService Integration Tests', () => {
       name: 'Tokyo',
       country: 'Japan',  
       coordinates: { lat: 35.6762, lon: 139.6503 },
-      populationWeight: 13.9
+      populationWeight: 13.9,
+      timezone: 'Asia/Tokyo'
     };
 
     const result = await weatherApiService.fetchWeatherForLocation(tokyo);

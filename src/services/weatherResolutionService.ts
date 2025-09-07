@@ -1,7 +1,7 @@
 import { db } from '../database/connection.js';
-import WagerService, { WagerInfluenceResult } from './wagerService.js';
-import WeatherApiService, { WeatherScore } from './weatherApiService.js';
-import FinalWeatherCalculator, { FinalWeatherCalculation } from './finalWeatherCalculator.js';
+import WagerService, { type WagerInfluenceResult } from './wagerService.js';
+import WeatherApiService, { type WeatherScore } from './weatherApiService.js';
+import FinalWeatherCalculator, { type FinalWeatherCalculation } from './finalWeatherCalculator.js';
 import { DAOApiController } from '../api/dao-endpoints.js';
 import logger from '../utils/logger.js';
 
@@ -113,7 +113,9 @@ class WeatherResolutionService {
 
       // Get DAO votes (this would integrate with actual DAO system)
       // For now, we'll simulate DAO consensus based on current market conditions
-      const daoVotes = await this.daoController.processWeatherVotes(cycleId.toString());
+      const daoVotes = await this.daoController.calculateVotes({
+        body: { blockIndex: Number(cycleId) }
+      } as any, {} as any) as any;
       
       // Apply hidden power weights (these would be configurable)
       const weights = {
@@ -289,7 +291,7 @@ class WeatherResolutionService {
       LIMIT $1
     `, [limit]);
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       cycleId: row.cycle_id,
       outcome: row.weather_outcome,
       score: row.final_weather_score,

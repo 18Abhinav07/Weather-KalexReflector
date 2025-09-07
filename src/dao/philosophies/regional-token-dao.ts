@@ -1,8 +1,10 @@
 // Regional Token DAO Philosophy
 // EUR/GBP/CAD/BRL performance. GOOD if emerging markets stable, BAD if stress
 
-import { DAOPhilosophy } from '../dao-registry';
-import { OracleAssetData, DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
+// Regional Token DAO Philosophy
+// EUR/GBP/CAD/BRL performance. GOOD if emerging markets stable, BAD if stress
+import type { DAOPhilosophy } from '../dao-registry';
+import { type OracleAssetData, type DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
 
 export class RegionalTokenDAO implements DAOPhilosophy {
   

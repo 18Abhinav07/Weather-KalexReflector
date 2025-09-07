@@ -1,7 +1,7 @@
 // Weather Farming API Endpoints
 // Implements user interface layer for SRS Phase 1 requirements
 
-import { Request, Response } from 'express';
+import { type Request, type Response } from 'express';
 import { userService } from '../services/user-service';
 import { depositMonitor } from '../services/deposit-monitor';
 import { plantRequestService } from '../services/plant-request-service';
@@ -33,16 +33,24 @@ export class WeatherFarmingAPI {
         return;
       }
 
-      const user = await userService.registerUser(username, email);
+      const user = await userService.registerUser({
+        mainWalletAddress: username, // Using username as wallet address for now
+        email: email
+      });
+      
+      if (!user.success) {
+        res.status(400).json({
+          success: false,
+          error: user.error || 'Registration failed'
+        } as ApiResponse);
+        return;
+      }
       
       res.status(201).json({
         success: true,
         data: {
           userId: user.userId,
-          username: user.username,
-          email: user.email,
-          custodialWallet: user.custodialWallet,
-          createdAt: user.createdAt
+          custodialWallet: user.custodialWalletAddress
         },
         message: 'User registered successfully with custodial wallet'
       } as ApiResponse);
@@ -114,29 +122,14 @@ export class WeatherFarmingAPI {
         return;
       }
 
-      const result = await depositMonitor.processDeposit(
-        userId,
-        BigInt(amount),
-        transactionHash,
-        'manual'
-      );
-
-      if (result) {
-        res.json({
-          success: true,
-          data: {
-            transactionId: result.transactionId,
-            amount: result.amount.toString(),
-            newBalance: result.newBalance.toString()
-          },
-          message: 'Deposit processed successfully'
-        } as ApiResponse);
-      } else {
-        res.status(400).json({
-          success: false,
-          error: 'Failed to process deposit'
-        } as ApiResponse);
-      }
+      // Note: Manual deposit processing is not yet implemented in the DepositMonitorService
+      // The service is designed for automatic monitoring. For manual processing, we need to 
+      // implement a manual deposit processing method in the service.
+      
+      res.status(501).json({
+        success: false,
+        error: 'Manual deposit processing not yet implemented. Use automatic monitoring instead.'
+      } as ApiResponse);
 
     } catch (error) {
       console.error('[API] Process deposit failed:', error);
@@ -162,22 +155,27 @@ export class WeatherFarmingAPI {
         return;
       }
 
-      const request = await plantRequestService.submitPlantRequest(
+      const request = await plantRequestService.submitPlantRequest({
         userId,
-        BigInt(stakeAmount),
-        targetBlock ? BigInt(targetBlock) : undefined
-      );
+        stakeAmount: BigInt(stakeAmount),
+        targetBlock: targetBlock ? BigInt(targetBlock) : BigInt(0),
+        cycleId: BigInt(0), // Will be set by the service
+        memo: req.body.memo
+      });
+
+      if (!request.success) {
+        res.status(400).json({
+          success: false,
+          error: request.error || 'Failed to submit plant request'
+        } as ApiResponse);
+        return;
+      }
 
       res.status(201).json({
         success: true,
         data: {
           requestId: request.requestId,
-          userId: request.userId,
-          stakeAmount: request.stakeAmount.toString(),
-          targetBlock: request.targetBlock.toString(),
-          status: request.status,
-          cycleId: request.cycleId?.toString(),
-          createdAt: request.createdAt
+          estimatedExecutionTime: request.estimatedExecutionTime
         },
         message: 'Plant request submitted successfully'
       } as ApiResponse);
@@ -198,29 +196,11 @@ export class WeatherFarmingAPI {
     try {
       const { requestId } = req.params;
 
-      const request = await plantRequestService.getPlantRequest(requestId);
-      if (!request) {
-        res.status(404).json({
-          success: false,
-          error: 'Plant request not found'
-        } as ApiResponse);
-        return;
-      }
-
-      res.json({
-        success: true,
-        data: {
-          requestId: request.requestId,
-          userId: request.userId,
-          stakeAmount: request.stakeAmount.toString(),
-          targetBlock: request.targetBlock.toString(),
-          status: request.status,
-          cycleId: request.cycleId?.toString(),
-          errorMessage: request.errorMessage,
-          transactionHash: request.transactionHash,
-          createdAt: request.createdAt,
-          updatedAt: request.updatedAt
-        }
+      // Note: PlantRequestService doesn't have getPlantRequest method
+      // This would need to be implemented or we could search through user requests
+      res.status(501).json({
+        success: false,
+        error: 'Plant request status lookup not yet implemented. Use getUserPlantRequests instead.'
       } as ApiResponse);
 
     } catch (error) {
@@ -242,22 +222,25 @@ export class WeatherFarmingAPI {
 
       const requests = await plantRequestService.getUserPlantRequests(
         userId,
-        status as string,
         parseInt(limit as string)
       );
 
+      // Filter by status if provided
+      const filteredRequests = status 
+        ? requests.filter(r => r.status === status)
+        : requests;
+
       res.json({
         success: true,
-        data: requests.map(request => ({
+        data: filteredRequests.map(request => ({
           requestId: request.requestId,
           stakeAmount: request.stakeAmount.toString(),
           targetBlock: request.targetBlock.toString(),
           status: request.status,
           cycleId: request.cycleId?.toString(),
           errorMessage: request.errorMessage,
-          transactionHash: request.transactionHash,
-          createdAt: request.createdAt,
-          updatedAt: request.updatedAt
+          submittedAt: request.submittedAt,
+          executedAt: request.executedAt
         }))
       } as ApiResponse);
 
@@ -303,7 +286,7 @@ export class WeatherFarmingAPI {
 
       res.json({
         success: true,
-        data: result.rows.map(row => ({
+        data: result.rows.map((row: any) => ({
           positionId: row.position_id,
           userId: row.user_id,
           cycleId: row.cycle_id?.toString(),
@@ -358,7 +341,7 @@ export class WeatherFarmingAPI {
 
       res.json({
         success: true,
-        data: result.rows.map(row => ({
+        data: result.rows.map((row: any) => ({
           cycleId: row.cycle_id?.toString(),
           startBlock: row.start_block?.toString(),
           endBlock: row.end_block?.toString(),
@@ -383,7 +366,7 @@ export class WeatherFarmingAPI {
   /**
    * Get Weather Statistics
    */
-  async getWeatherStatistics(req: Request, res: Response): Promise<void> {
+  async getWeatherStatistics(_req: Request, res: Response): Promise<void> {
     try {
       const stats = await weatherIntegrationService.getWeatherStatistics();
 
@@ -410,7 +393,7 @@ export class WeatherFarmingAPI {
   /**
    * Get Automation Status
    */
-  async getAutomationStatus(req: Request, res: Response): Promise<void> {
+  async getAutomationStatus(_req: Request, res: Response): Promise<void> {
     try {
       const status = farmingAutomationEngine.getAutomationStatus();
       const healthCheck = await farmingAutomationEngine.healthCheck();
@@ -462,7 +445,7 @@ export class WeatherFarmingAPI {
 
       res.json({
         success: true,
-        data: result.rows.map(row => ({
+        data: result.rows.map((row: any) => ({
           transactionId: row.transaction_id,
           userId: row.user_id,
           transactionType: row.transaction_type,

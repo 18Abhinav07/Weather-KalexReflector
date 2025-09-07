@@ -1,5 +1,5 @@
 import { db } from '../database/connection.js';
-import WagerService, { WagerInfluenceResult } from './wagerService.js';
+import WagerService, { type WagerInfluenceResult } from './wagerService.js';
 import WeatherApiService from './weatherApiService.js';
 import { DAOApiController } from '../api/dao-endpoints.js';
 import logger from '../utils/logger.js';
@@ -155,7 +155,9 @@ class FinalWeatherCalculator {
 
     try {
       // Get DAO predictions (this integrates with the actual DAO system)
-      const daoVotes = await this.daoController.processWeatherVotes(cycleId.toString());
+      const daoVotes = await this.daoController.calculateVotes({
+        body: { blockIndex: Number(cycleId) }
+      } as any, {} as any) as any;
       
       // Simulate individual DAO predictions with different methodologies
       const daoConsensus: DAOWeatherConsensus = {
@@ -472,7 +474,7 @@ class FinalWeatherCalculator {
       LIMIT $1
     `, [limit]);
 
-    return result.rows.map(row => ({
+    return result.rows.map((row: any) => ({
       cycleId: row.cycle_id,
       outcome: row.weather_outcome,
       finalScore: row.final_weather_score,

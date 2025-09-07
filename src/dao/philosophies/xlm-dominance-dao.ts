@@ -1,8 +1,10 @@
 // XLM Dominance DAO Philosophy  
 // Compares XLM performance vs BTC/ETH. GOOD if XLM outperforming >5%
 
-import { DAOPhilosophy } from '../dao-registry';
-import { OracleAssetData, DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
+// XLM Dominance DAO Philosophy  
+// Compares XLM performance vs BTC/ETH. GOOD if XLM outperforming >5%
+import type { DAOPhilosophy } from '../dao-registry';
+import { type OracleAssetData, type DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
 
 export class XlmDominanceDAO implements DAOPhilosophy {
   

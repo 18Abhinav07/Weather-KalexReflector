@@ -72,17 +72,23 @@ export class WeatherIntegrationService extends EventEmitter {
         body: { blockIndex: Number(weatherBlock) }
       } as any, {} as any);
 
-      if (!daoResponse || !daoResponse.consensusResult) {
+      if (typeof daoResponse !== 'object' || !daoResponse || !('consensusResult' in daoResponse)) {
         throw new Error('Failed to get DAO weather prediction');
       }
+
+      const response = daoResponse as {
+        consensusResult: { finalWeather: 'GOOD' | 'BAD'; consensusScore: number };
+        analysis?: { agreement: number };
+        voteCount?: number;
+      };
 
       // Convert DAO response to weather outcome
       const outcome: WeatherOutcome = {
         cycleId,
-        outcome: daoResponse.consensusResult.finalWeather,
-        confidence: daoResponse.analysis?.agreement || 0.5,
-        consensusScore: daoResponse.consensusResult.consensusScore,
-        daoVoteCount: daoResponse.voteCount || 0,
+        outcome: response.consensusResult.finalWeather,
+        confidence: response.analysis?.agreement || 0.5,
+        consensusScore: response.consensusResult.consensusScore,
+        daoVoteCount: response.voteCount || 0,
         timestamp: new Date(),
         blockIndex: BigInt(weatherBlock)
       };
@@ -229,7 +235,7 @@ export class WeatherIntegrationService extends EventEmitter {
         `, [currentOutcome.outcome, currentOutcome.confidence, cycleId]);
 
         // Calculate settlement summary
-        const totalStaked = positions.reduce((sum, p) => sum + BigInt(p.stake_amount), 0n);
+        const totalStaked = positions.reduce((sum: bigint, p: any) => sum + BigInt(p.stake_amount), 0n);
         const averageReward = positions.length > 0 ? totalRewardsDistributed / BigInt(positions.length) : 0n;
 
         return {
@@ -270,7 +276,7 @@ export class WeatherIntegrationService extends EventEmitter {
         ORDER BY end_block ASC
       `, [currentBlock]);
 
-      return result.rows.map(row => BigInt(row.cycle_id));
+      return result.rows.map((row: any) => BigInt(row.cycle_id));
     } catch (error) {
       console.error('[WeatherIntegrationService] Failed to get cycles ready for weather:', error);
       return [];
@@ -392,7 +398,7 @@ export class WeatherIntegrationService extends EventEmitter {
         LIMIT $1
       `, [limit]);
 
-      return result.rows.map(row => ({
+      return result.rows.map((row: any) => ({
         cycleId: BigInt(row.cycle_id),
         participantCount: parseInt(row.total_participants),
         totalStaked: BigInt(row.total_stake_amount || 0),

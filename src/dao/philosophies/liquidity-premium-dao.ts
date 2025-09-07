@@ -1,8 +1,10 @@
 // Liquidity Premium DAO Philosophy  
 // Price differences between oracles for same assets. GOOD if low liquidity premiums (efficient markets)
 
-import { DAOPhilosophy } from '../dao-registry';
-import { OracleAssetData, DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
+// Liquidity Premium DAO Philosophy  
+// Price differences between oracles for same assets. GOOD if low liquidity premiums (efficient markets)
+import type { DAOPhilosophy } from '../dao-registry';
+import { type OracleAssetData, type DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
 
 export class LiquidityPremiumDAO implements DAOPhilosophy {
   

@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import WagerService, { WagerDirection, WagerPosition } from '../services/wagerService.js';
+import { type Request, type Response } from 'express';
+import WagerService, { WagerDirection, type WagerPosition } from '../services/wagerService.js';
 import logger from '../utils/logger.js';
 
 class WagerApiController {

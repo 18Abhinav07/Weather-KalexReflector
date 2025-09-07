@@ -1,7 +1,7 @@
 // Database Connection Management for KALE Weather Farming System
 // Implements SRS Section 7 Data Requirements with PostgreSQL
 
-import { Pool, PoolConfig, Client } from 'pg';
+import { Pool, type PoolConfig, Client } from 'pg';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 

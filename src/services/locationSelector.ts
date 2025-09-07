@@ -273,4 +273,4 @@ class LocationSelector {
 }
 
 export default LocationSelector;
-export { Location, LocationSelectionResult };
+export type { Location, LocationSelectionResult };

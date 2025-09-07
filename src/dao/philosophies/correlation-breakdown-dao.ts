@@ -1,8 +1,10 @@
 // Correlation Breakdown DAO Philosophy
 // Asset correlation changes. GOOD if traditional correlations breaking down (diversification opportunity)
 
-import { DAOPhilosophy } from '../dao-registry';
-import { OracleAssetData, DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
+// Correlation Breakdown DAO Philosophy
+// Asset correlation changes. GOOD if traditional correlations breaking down (diversification opportunity)
+import type { DAOPhilosophy } from '../dao-registry';
+import { type OracleAssetData, type DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
 
 export class CorrelationBreakdownDAO implements DAOPhilosophy {
   
@@ -29,7 +31,7 @@ export class CorrelationBreakdownDAO implements DAOPhilosophy {
 
       // Count correlation breakdowns (low correlation or high divergence)
       const breakdownCount = breakdowns.filter(b => 
-        (b.correlation !== null && Math.abs(b.correlation) < 0.5) ||
+        (b.correlation !== null && b.correlation !== undefined && Math.abs(b.correlation) < 0.5) ||
         (b.divergence !== undefined && Math.abs(b.divergence) > 0.03)
       ).length;
       

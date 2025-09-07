@@ -1,8 +1,10 @@
 // Stellar DEX Health DAO Philosophy
 // Stellar ecosystem tokens health. GOOD if Stellar native assets performing well
 
-import { DAOPhilosophy } from '../dao-registry';
-import { OracleAssetData, DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
+// Stellar DEX Health DAO Philosophy
+// Stellar ecosystem tokens health. GOOD if Stellar native assets performing well
+import type { DAOPhilosophy } from '../dao-registry';
+import { type OracleAssetData, type DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
 
 export class StellarDEXHealthDAO implements DAOPhilosophy {
   

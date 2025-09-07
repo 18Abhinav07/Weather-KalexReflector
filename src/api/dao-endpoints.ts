@@ -4,13 +4,13 @@
 import type { Request, Response } from 'express';
 import { ReflectorClient } from '../oracle/reflector-client';
 import { DAORegistry } from '../dao/dao-registry';
-import { WeightedVotingSystem, TieBreakerData } from '../consensus/weighted-voting';
+import { WeightedVotingSystem, type TieBreakerData } from '../consensus/weighted-voting';
 import { 
-  VotingCycle, 
-  ConsensusResult, 
-  DAOVote, 
-  WeatherOutcome,
-  OracleAssetData 
+  type VotingCycle, 
+  type ConsensusResult, 
+  type DAOVote, 
+  type OracleAssetData, 
+  WeatherOutcome
 } from '../types/oracle-types';
 
 // Import all DAO philosophy implementations

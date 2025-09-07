@@ -8,7 +8,7 @@ import { ReflectorClient } from './oracle/reflector-client';
 import { DAORegistry } from './dao/dao-registry';
 import { WeightedVotingSystem } from './consensus/weighted-voting';
 import { DAOApiController } from './api/dao-endpoints';
-import { VotingCycle, OracleAssetData, ConsensusResult } from './types/oracle-types';
+import type { VotingCycle, OracleAssetData, ConsensusResult } from './types/oracle-types';
 
 // Import all DAO philosophy implementations
 import { CryptoMomentumDAO } from './dao/philosophies/crypto-momentum-dao';

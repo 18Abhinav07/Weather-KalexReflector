@@ -1,8 +1,10 @@
 // Volume-Price DAO Philosophy
 // Price volatility patterns as volume proxy. GOOD if high volatility with directional bias
 
-import { DAOPhilosophy } from '../dao-registry';
-import { OracleAssetData, DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
+// Volume-Price DAO Philosophy
+// Price volatility patterns as volume proxy. GOOD if high volatility with directional bias
+import type { DAOPhilosophy } from '../dao-registry';
+import { type OracleAssetData, type DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
 
 export class VolumePriceDAO implements DAOPhilosophy {
   

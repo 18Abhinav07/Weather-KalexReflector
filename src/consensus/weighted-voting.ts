@@ -1,7 +1,7 @@
 // Weighted Consensus Mechanism for DAO Voting
 // Implements the algorithm specified in DAOCreation.md
 
-import { DAOVote, WeatherOutcome, ConsensusResult, DAOConfig } from '../types/oracle-types';
+import { type DAOVote, WeatherOutcome, type ConsensusResult, type DAOConfig } from '../types/oracle-types';
 
 export interface TieBreakerData {
   blockEntropy: string;

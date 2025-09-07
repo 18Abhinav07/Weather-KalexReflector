@@ -8,7 +8,7 @@ type Symbol = string;
 type Vec<T> = T[];
 
 const { Server } = SorobanRpc;
-import { 
+import type { 
   OracleSource, 
   PriceData, 
   Asset, 
@@ -54,7 +54,7 @@ export const ORACLE_SOURCES: OracleSource[] = [
 ];
 
 export class ReflectorClient {
-  private rpcServer: Server;
+  private rpcServer: InstanceType<typeof Server>;
   private env: Env;
   private cache: Map<string, OracleData> = new Map();
   private priceHistory: Map<string, PriceData[]> = new Map(); // Store price history for trend analysis

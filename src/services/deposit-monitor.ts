@@ -1,7 +1,7 @@
 // KALE Deposit Monitoring Service
 // Implements SRS REQ-002: KALE token deposit and withdrawal management
 
-import { Server as HorizonServer } from '@stellar/stellar-sdk/horizon';
+import { Horizon } from '@stellar/stellar-sdk';
 import { Asset } from '@stellar/stellar-sdk';
 import { db } from '../database/connection';
 import { EventEmitter } from 'events';
@@ -39,7 +39,7 @@ export interface BalanceUpdateEvent {
 }
 
 export class DepositMonitorService extends EventEmitter {
-  private horizonServer: HorizonServer;
+  private horizonServer: Horizon.Server;
   private isMonitoring = false;
   private monitoringIntervals: Map<string, NodeJS.Timeout> = new Map();
   private readonly KALE_ASSET: Asset;
@@ -54,7 +54,7 @@ export class DepositMonitorService extends EventEmitter {
       ? 'https://horizon.stellar.org'
       : 'https://horizon-testnet.stellar.org';
     
-    this.horizonServer = new HorizonServer(networkUrl);
+    this.horizonServer = new Horizon.Server(networkUrl);
 
     // Initialize KALE asset
     const kaleIssuer = process.env.KALE_TOKEN_ADDRESS || 'GBDVX4VELCDSQ54KQJYTNHXAHFLBCA77ZY2USQBM4CSHTTV7DME7KALE';
@@ -426,7 +426,7 @@ export class DepositMonitorService extends EventEmitter {
         WHERE is_active = true
       `);
 
-      return result.rows.map(row => ({
+      return result.rows.map((row: any) => ({
         walletAddress: row.wallet_address,
         userId: row.user_id
       }));

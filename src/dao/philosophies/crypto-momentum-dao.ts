@@ -1,8 +1,10 @@
 // Crypto Momentum DAO Philosophy
 // Tracks BTC/ETH/XLM 5-minute momentum. GOOD if 2+ assets show >1% positive movement
 
-import { DAOPhilosophy } from '../dao-registry';
-import { OracleAssetData, DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
+// Crypto Momentum DAO Philosophy
+// Tracks BTC/ETH/XLM 5-minute momentum. GOOD if 2+ assets show >1% positive movement
+import type { DAOPhilosophy } from '../dao-registry';
+import { type OracleAssetData, type DAOAnalysis, WeatherOutcome } from '../../types/oracle-types';
 
 export class CryptoMomentumDAO implements DAOPhilosophy {
   
