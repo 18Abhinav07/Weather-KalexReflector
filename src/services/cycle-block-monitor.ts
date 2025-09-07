@@ -6,6 +6,9 @@ import { Keypair } from '@stellar/stellar-sdk';
 import { Client as KaleClient } from 'kale-sc-sdk';
 import { db } from '../database/connection';
 import { DAOApiController } from '../api/dao-endpoints';
+import LocationSelector, { LocationSelectionResult } from './locationSelector.js';
+import WeatherApiService, { WeatherApiResult } from './weatherApiService.js';
+import logger from '../utils/logger.js';
 
 export interface CycleInfo {
   cycleId: bigint;
@@ -18,15 +21,15 @@ export interface CycleInfo {
 }
 
 export enum CyclePhase {
-  PLANTING = 'planting',    // Blocks 0-6: Users can plant
-  WORKING = 'working',      // Blocks 7-8: Work processing
+  PLANTING = 'planting',    // Blocks 0-5: Users can plant and place wagers
+  WORKING = 'working',      // Blocks 6-8: Location revealed, agriculture only
   REVEALING = 'revealing',  // Block 9: DAO vote reveal & weather determination
   SETTLING = 'settling'     // Block 10+: Harvest & settlement
 }
 
 export interface CyclePhaseConfig {
-  plantingBlocks: number;   // Default: 7 blocks (0-6)
-  workingBlocks: number;    // Default: 2 blocks (7-8)
+  plantingBlocks: number;   // Default: 6 blocks (0-5)
+  workingBlocks: number;    // Default: 3 blocks (6-8)
   revealingBlocks: number;  // Default: 1 block (9)
   settlingBlocks: number;   // Default: 1+ blocks (10+)
 }
@@ -34,6 +37,8 @@ export interface CyclePhaseConfig {
 export class CycleBlockMonitor extends EventEmitter {
   private kaleClient: KaleClient;
   private daoController: DAOApiController;
+  private locationSelector: LocationSelector;
+  private weatherApiService: WeatherApiService;
   private isRunning = false;
   private monitorInterval: NodeJS.Timeout | null = null;
   private currentBlock = 0n;
@@ -46,8 +51,8 @@ export class CycleBlockMonitor extends EventEmitter {
   
   // Phase configuration
   private readonly phaseConfig: CyclePhaseConfig = {
-    plantingBlocks: parseInt(process.env.PLANTING_BLOCKS || '7'),
-    workingBlocks: parseInt(process.env.WORKING_BLOCKS || '2'), 
+    plantingBlocks: parseInt(process.env.PLANTING_BLOCKS || '6'),
+    workingBlocks: parseInt(process.env.WORKING_BLOCKS || '3'), 
     revealingBlocks: parseInt(process.env.REVEALING_BLOCKS || '1'),
     settlingBlocks: parseInt(process.env.SETTLING_BLOCKS || '1')
   };
@@ -67,6 +72,9 @@ export class CycleBlockMonitor extends EventEmitter {
       process.env.STELLAR_RPC_URL || 'https://mainnet.sorobanrpc.com',
       process.env.STELLAR_CONTRACT_ID || 'CDL74RF5BLYR2YBLCCI7F5FB6TPSCLKEJUBSD2RSVWZ4YHF3VMFAIGWA'
     );
+
+    this.locationSelector = new LocationSelector();
+    this.weatherApiService = new WeatherApiService();
 
     console.log('[CycleBlockMonitor] Initialized with cycle config:', {
       cycleLength: this.CYCLE_LENGTH,
@@ -215,12 +223,12 @@ export class CycleBlockMonitor extends EventEmitter {
   }
 
   /**
-   * Handle planting phase (blocks 0-6)
+   * Handle planting phase (blocks 0-5)
    */
   private async handlePlantingPhase(): Promise<void> {
     console.log('[CycleBlockMonitor] 🌱 Entering PLANTING phase');
     
-    // Enable plant request processing
+    // Enable plant and wager request processing
     this.emit('plantingPhaseStarted', this.currentCycle);
     
     // Update cycle state in database
@@ -234,12 +242,15 @@ export class CycleBlockMonitor extends EventEmitter {
   }
 
   /**
-   * Handle working phase (blocks 7-8)
+   * Handle working phase (blocks 6-8) - Location revealed at block 6
    */
   private async handleWorkingPhase(): Promise<void> {
-    console.log('[CycleBlockMonitor] 🔨 Entering WORKING phase');
+    console.log('[CycleBlockMonitor] 🔨 Entering WORKING phase - Location will be revealed');
     
-    // Stop new plant requests, process pending work
+    // At block 6: Reveal real-world location
+    await this.revealCycleLocation();
+    
+    // Stop new wager requests, allow only agriculture
     this.emit('workingPhaseStarted', this.currentCycle);
     
     if (this.currentCycle) {
@@ -345,6 +356,130 @@ export class CycleBlockMonitor extends EventEmitter {
       console.log(`[CycleBlockMonitor] ✅ Cycle ${cycleId} finalized`);
     } catch (error) {
       console.error('[CycleBlockMonitor] Failed to finalize cycle:', error);
+    }
+  }
+
+  /**
+   * Reveal real-world location for current cycle (triggered at block 6)
+   */
+  private async revealCycleLocation(): Promise<void> {
+    if (!this.currentCycle) {
+      logger.error('Cannot reveal location: no current cycle');
+      return;
+    }
+
+    try {
+      logger.info(`Revealing location for cycle ${this.currentCycle.cycleId} at block ${this.currentBlock}`);
+
+      // Generate block entropy from current block
+      const blockEntropy = `${this.currentBlock}${Date.now()}`;
+      
+      // Select location using cryptographic randomness
+      const locationResult = this.locationSelector.selectLocationForCycle(
+        this.currentCycle.cycleId.toString(),
+        blockEntropy
+      );
+
+      // Store location in database
+      await db.query(`
+        UPDATE weather_cycles 
+        SET 
+          revealed_location_id = $1,
+          revealed_location_name = $2,
+          revealed_location_coords = $3,
+          location_selection_hash = $4,
+          location_revealed_at = NOW()
+        WHERE cycle_id = $5
+      `, [
+        locationResult.location.id,
+        `${locationResult.location.name}, ${locationResult.location.country}`,
+        JSON.stringify(locationResult.location.coordinates),
+        locationResult.selectionHash,
+        this.currentCycle.cycleId
+      ]);
+
+      logger.info(`Location revealed: ${JSON.stringify({
+        cycleId: this.currentCycle.cycleId.toString(),
+        location: locationResult.location.name,
+        country: locationResult.location.country
+      })}`);
+
+      // Emit location revealed event
+      this.emit('locationRevealed', {
+        cycle: this.currentCycle,
+        locationResult,
+        block: this.currentBlock
+      });
+
+      // Fetch real-time weather for the selected location
+      logger.info(`Fetching real-time weather for ${locationResult.location.name}...`);
+      const weatherResult = await this.weatherApiService.fetchWeatherForLocation(locationResult.location);
+      
+      if (weatherResult.success && weatherResult.data && weatherResult.score) {
+        // Store weather data in database
+        await db.query(`
+          UPDATE weather_cycles 
+          SET 
+            current_weather_data = $1,
+            weather_score = $2,
+            weather_source = $3,
+            weather_fetched_at = NOW()
+          WHERE cycle_id = $4
+        `, [
+          JSON.stringify(weatherResult.data),
+          weatherResult.score.normalized,
+          weatherResult.source,
+          this.currentCycle.cycleId
+        ]);
+
+        const interpretation = this.weatherApiService.getWeatherInterpretation(weatherResult.score);
+        
+        logger.info(`Real-time weather for ${locationResult.location.name}: ${JSON.stringify({
+          temperature: weatherResult.data.temperature,
+          conditions: weatherResult.data.conditions,
+          score: weatherResult.score.normalized,
+          outlook: interpretation.farmingOutlook,
+          source: weatherResult.source
+        })}`);
+
+        // Emit weather data event
+        this.emit('weatherDataFetched', {
+          cycle: this.currentCycle,
+          location: locationResult.location,
+          weather: weatherResult.data,
+          score: weatherResult.score,
+          interpretation,
+          block: this.currentBlock
+        });
+
+      } else {
+        logger.warn(`Failed to fetch weather for ${locationResult.location.name}: ${weatherResult.error}`);
+        
+        // Store failure in database
+        await db.query(`
+          UPDATE weather_cycles 
+          SET 
+            weather_fetch_error = $1,
+            weather_fetched_at = NOW()
+          WHERE cycle_id = $2
+        `, [
+          weatherResult.error || 'Unknown weather API error',
+          this.currentCycle.cycleId
+        ]);
+      }
+
+      // Get farming context for the location
+      const farmingContext = this.locationSelector.getLocationFarmingContext(locationResult.location);
+      
+      logger.info(`Farming conditions for ${locationResult.location.name}: ${JSON.stringify({
+        suitability: farmingContext.farmingSuitability,
+        climateZone: farmingContext.climateZone,
+        seasonalOptimal: farmingContext.seasonalFactors.isOptimalKaleGrowingSeason
+      })}`);
+
+    } catch (error: any) {
+      logger.error(`Failed to reveal location for cycle ${this.currentCycle.cycleId}: ${error.message}`);
+      this.emit('locationRevealError', { cycle: this.currentCycle, error });
     }
   }
 

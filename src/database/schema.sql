@@ -41,6 +41,21 @@ CREATE TABLE weather_cycles (
     current_state VARCHAR(20) DEFAULT 'active' CHECK (current_state IN ('active', 'completed', 'settled')),
     weather_outcome VARCHAR(10) CHECK (weather_outcome IN ('GOOD', 'BAD')), -- Binary outcome per SRS
     weather_confidence DECIMAL(5,4), -- DAO confidence score (0.0000-1.0000)
+    
+    -- Real-world location data (revealed at block 6)
+    revealed_location_id VARCHAR(50), -- Location identifier (e.g., 'tokyo-jp')
+    revealed_location_name VARCHAR(100), -- Human-readable name (e.g., 'Tokyo, Japan')  
+    revealed_location_coords JSONB, -- Coordinates as JSON: {"lat": 35.6762, "lon": 139.6503}
+    location_selection_hash VARCHAR(64), -- SHA-256 hash of selection process
+    location_revealed_at TIMESTAMP WITH TIME ZONE, -- When location was revealed (block 6)
+    
+    -- Real-time weather data (fetched after location reveal)
+    current_weather_data JSONB, -- Full weather data as JSON
+    weather_score DECIMAL(5,2), -- Kale farming suitability score (0.00-100.00)
+    weather_source VARCHAR(50), -- API source (e.g., 'OpenWeatherMap')
+    weather_fetched_at TIMESTAMP WITH TIME ZONE, -- When weather was fetched
+    weather_fetch_error TEXT, -- Error message if weather fetch failed
+    
     total_participants INTEGER DEFAULT 0,
     total_stake_amount BIGINT DEFAULT 0, -- Total KALE staked in cycle
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
