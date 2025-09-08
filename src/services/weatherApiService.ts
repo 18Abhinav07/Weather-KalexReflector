@@ -57,25 +57,13 @@ class WeatherApiService {
   private readonly API_TIMEOUT = 10000; // 10 seconds
   private readonly MAX_RETRIES = 3;
   
-  // Multiple weather API configurations
+  // Single weather API configuration (OpenWeatherMap only)  
   private readonly APIs = {
     openweather: {
       name: 'OpenWeatherMap',
       url: 'https://api.openweathermap.org/data/2.5/weather',
       key: process.env.OPENWEATHER_API_KEY,
       enabled: !!process.env.OPENWEATHER_API_KEY
-    },
-    weatherapi: {
-      name: 'WeatherAPI.com',
-      url: 'https://api.weatherapi.com/v1/current.json',
-      key: process.env.WEATHERAPI_KEY,
-      enabled: !!process.env.WEATHERAPI_KEY
-    },
-    visualcrossing: {
-      name: 'Visual Crossing',
-      url: 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline',
-      key: process.env.VISUALCROSSING_API_KEY,
-      enabled: !!process.env.VISUALCROSSING_API_KEY
     }
   };
 
@@ -104,9 +92,7 @@ class WeatherApiService {
 
     // Try each API in sequence until one succeeds
     const apiAttempts = [
-      () => this.fetchFromOpenWeather(location),
-      () => this.fetchFromWeatherAPI(location),
-      () => this.fetchFromVisualCrossing(location)
+      () => this.fetchFromOpenWeather(location)
     ];
 
     for (let i = 0; i < apiAttempts.length; i++) {
@@ -192,80 +178,6 @@ class WeatherApiService {
     };
   }
 
-  /**
-   * Fetch from WeatherAPI.com
-   */
-  private async fetchFromWeatherAPI(location: Location): Promise<WeatherApiResult> {
-    const api = this.APIs.weatherapi;
-    if (!api.enabled) {
-      throw new Error('WeatherAPI key not configured');
-    }
-
-    const url = `${api.url}?key=${api.key}&q=${location.coordinates.lat},${location.coordinates.lon}&aqi=no`;
-    
-    const response: AxiosResponse = await axios.get(url, {
-      timeout: this.API_TIMEOUT
-    });
-
-    const data = response.data.current;
-    const weatherData: WeatherData = {
-      temperature: data.temp_c,
-      humidity: data.humidity,
-      windSpeed: data.wind_kph,
-      precipitation: data.precip_mm,
-      conditions: data.condition.text,
-      source: api.name,
-      timestamp: new Date()
-    };
-
-    return {
-      success: true,
-      weather: {
-        data: weatherData,
-        score: 0, // Will be calculated later
-        factors: { temperature: 0, humidity: 0, wind: 0, precipitation: 0 },
-        source: api.name
-      }
-    };
-  }
-
-  /**
-   * Fetch from Visual Crossing Weather API
-   */
-  private async fetchFromVisualCrossing(location: Location): Promise<WeatherApiResult> {
-    const api = this.APIs.visualcrossing;
-    if (!api.enabled) {
-      throw new Error('Visual Crossing API key not configured');
-    }
-
-    const today = new Date().toISOString().split('T')[0];
-    const url = `${api.url}/${location.coordinates.lat},${location.coordinates.lon}/${today}?key=${api.key}&include=current&unitGroup=metric`;
-    
-    const response: AxiosResponse = await axios.get(url, {
-      timeout: this.API_TIMEOUT
-    });
-
-    const current = response.data.currentConditions;
-    const weatherData: WeatherData = {
-      temperature: current.temp,
-      humidity: current.humidity,
-      windSpeed: current.windspeed,
-      precipitation: current.precip || 0,
-      conditions: current.conditions,
-      source: api.name,
-      timestamp: new Date()
-    };
-
-    return {
-      success: true,
-      weather: {
-        data: weatherData,
-        score: 0, // Will be calculated later
-        factors: { temperature: 0, humidity: 0, wind: 0, precipitation: 0 },
-        source: api.name
-      }
-    };
-  }
 
   /**
    * Calculate kale farming suitability score based on weather conditions
@@ -421,12 +333,6 @@ class WeatherApiService {
         let testSuccess = false;
         if (name === 'openweather') {
           const result = await this.fetchFromOpenWeather(testLocation);
-          testSuccess = result.success;
-        } else if (name === 'weatherapi') {
-          const result = await this.fetchFromWeatherAPI(testLocation);
-          testSuccess = result.success;
-        } else if (name === 'visualcrossing') {
-          const result = await this.fetchFromVisualCrossing(testLocation);
           testSuccess = result.success;
         }
         

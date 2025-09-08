@@ -39,6 +39,11 @@ class WagerService {
         throw new Error('Wager amount must be positive');
       }
 
+      // Maximum wager amount (10,000 KALE)
+      if (stakeAmount > 10000) {
+        throw new Error('Wager amount exceeds maximum limit of 10,000 KALE');
+      }
+
       if (!Object.values(WagerDirection).includes(direction)) {
         throw new Error('Invalid wager direction');
       }

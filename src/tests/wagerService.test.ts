@@ -87,7 +87,7 @@ describe('WagerService', () => {
         expect(true).toBe(false); // Should not reach here
       } catch (error) {
         expect(error instanceof Error).toBe(true);
-        expect(error.message).toContain('positive');
+        expect(error.message).toContain('maximum');
       }
     });
 

@@ -28,7 +28,8 @@
     "express-rate-limit": "^8.1.0",
     "helmet": "^8.1.0",
     "kale-sc-sdk": "file:./ext/kale-sc-sdk",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.35.0",

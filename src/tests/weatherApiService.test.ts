@@ -29,17 +29,17 @@ describe('WeatherApiService', () => {
   describe('Constructor', () => {
     it('should initialize with correct API keys and URLs', () => {
       expect(weatherApiService).toBeDefined();
-      expect((weatherApiService as any).openWeatherMapApiKey).toBeDefined();
-      expect((weatherApiService as any).weatherApiKey).toBeDefined();
-      expect((weatherApiService as any).visualCrossingApiKey).toBeDefined();
+      expect((weatherApiService as any).APIs.openweather.enabled).toBe(true);
+      expect((weatherApiService as any).APIs.openweather.key).toBeDefined();
+      expect((weatherApiService as any).APIs.openweather.url).toContain('openweathermap.org');
     });
 
-    it('should have all three weather providers configured', () => {
+    it('should have OpenWeatherMap provider configured', () => {
       const service = new WeatherApiService();
-      expect((service as any).providers).toHaveLength(3);
-      expect((service as any).providers.map((p: any) => p.name)).toContain('OpenWeatherMap');
-      expect((service as any).providers.map((p: any) => p.name)).toContain('WeatherAPI');
-      expect((service as any).providers.map((p: any) => p.name)).toContain('Visual Crossing');
+      const apis = (service as any).APIs;
+      expect(Object.keys(apis)).toHaveLength(1);
+      expect(apis.openweather.name).toBe('OpenWeatherMap');
+      expect(apis.openweather.enabled).toBe(true);
     });
   });
 
@@ -69,59 +69,15 @@ describe('WeatherApiService', () => {
       expect(result.weather!.source).toBe('OpenWeatherMap');
     });
 
-    it('should fallback to WeatherAPI when OpenWeatherMap fails', async () => {
-      const mockWeatherApiData = {
-        current: {
-          temp_c: 16.8,
-          humidity: 72,
-          condition: { text: 'Partly cloudy' },
-          wind_kph: 12.8,
-          precip_mm: 0
-        }
-      };
 
-      spyOn(axios, 'get')
-        .mockRejectedValueOnce(new Error('OpenWeatherMap API failed'))
-        .mockResolvedValueOnce({ data: mockWeatherApiData });
-
-      const result = await weatherApiService.fetchWeatherForLocation(mockLocation);
-
-      expect(result.success).toBe(true);
-      expect(result.weather!.source).toBe('WeatherAPI');
-      expect(result.weather!.data.temperature).toBe(16.8);
-    });
-
-    it('should fallback to Visual Crossing when first two providers fail', async () => {
-      const mockVisualCrossingData = {
-        currentConditions: {
-          temp: 15.5,
-          humidity: 68,
-          conditions: 'Overcast',
-          windspeed: 8.5,
-          precip: 0.2
-        }
-      };
-
-      spyOn(axios, 'get')
-        .mockRejectedValueOnce(new Error('OpenWeatherMap failed'))
-        .mockRejectedValueOnce(new Error('WeatherAPI failed'))
-        .mockResolvedValueOnce({ data: mockVisualCrossingData });
-
-      const result = await weatherApiService.fetchWeatherForLocation(mockLocation);
-
-      expect(result.success).toBe(true);
-      expect(result.weather!.source).toBe('Visual Crossing');
-      expect(result.weather!.data.temperature).toBe(15.5);
-    });
-
-    it('should return failure when all providers fail', async () => {
+    it('should return failure when OpenWeatherMap fails', async () => {
       spyOn(axios, 'get')
         .mockRejectedValue(new Error('API failed'));
 
       const result = await weatherApiService.fetchWeatherForLocation(mockLocation);
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain('Failed to fetch weather from all providers');
+      expect(result.error).toContain('All weather APIs failed');
     });
 
     it('should handle invalid location coordinates', async () => {
@@ -141,11 +97,11 @@ describe('WeatherApiService', () => {
   describe('calculateKaleFarmingScore', () => {
     it('should calculate optimal score for ideal kale conditions', () => {
       const idealWeather = {
-        temperature: 16,
-        humidity: 70,
+        temperature: 20, // Within optimal range 18-24°C
+        humidity: 65,    // Within optimal range 60-70%
         conditions: 'partly cloudy',
-        windSpeed: 8,
-        precipitation: 0,
+        windSpeed: 10,   // Within optimal range 5-15 km/h
+        precipitation: 1, // Within beneficial range 0.5-5mm
         source: 'test',
         timestamp: new Date()
       };
@@ -209,7 +165,7 @@ describe('WeatherApiService', () => {
     });
 
     it('should provide correct farming interpretations', () => {
-      const excellentWeather = { temperature: 15, humidity: 65, conditions: 'clear', windSpeed: 6, precipitation: 0, source: 'test', timestamp: new Date() };
+      const excellentWeather = { temperature: 21, humidity: 65, conditions: 'clear', windSpeed: 8, precipitation: 1, source: 'test', timestamp: new Date() };
       const goodWeather = { temperature: 18, humidity: 75, conditions: 'cloudy', windSpeed: 12, precipitation: 1, source: 'test', timestamp: new Date() };
       const fairWeather = { temperature: 22, humidity: 80, conditions: 'rain', windSpeed: 15, precipitation: 5, source: 'test', timestamp: new Date() };
       const poorWeather = { temperature: 30, humidity: 95, conditions: 'thunderstorm', windSpeed: 30, precipitation: 20, source: 'test', timestamp: new Date() };

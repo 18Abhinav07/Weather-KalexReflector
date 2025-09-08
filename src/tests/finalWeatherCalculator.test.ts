@@ -236,7 +236,7 @@ describe('FinalWeatherCalculator', () => {
             wind: 0.8,
             precipitation: 1.0
           },
-          source: 'WeatherAPI',
+          source: 'WeatherAPI.com',
           interpretation: {
             farmingOutlook: 'excellent',
             weatherCategory: 'ideal'
@@ -252,7 +252,7 @@ describe('FinalWeatherCalculator', () => {
       expect(weatherComponent.score).toBe(92);
       expect(weatherComponent.weight).toBe(0.3);
       expect(weatherComponent.confidence).toBeGreaterThan(0.8);
-      expect(weatherComponent.source).toBe('WeatherAPI');
+      expect(weatherComponent.source).toBe('WeatherAPI.com');
       expect(weatherComponent.data).toEqual(mockWeatherResult.weather.data);
     });
 

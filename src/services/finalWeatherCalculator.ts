@@ -68,6 +68,11 @@ class FinalWeatherCalculator {
   private weatherApiService: WeatherApiService;
   private daoController: DAOApiController;
 
+  // Component weights for final calculation
+  private readonly daoWeight = 0.5;        // DAO consensus weight
+  private readonly realWeatherWeight = 0.3;  // Real weather data weight
+  private readonly wagerWeight = 0.2;      // Community wager weight
+
   // DAO Hidden Power Weights (configurable via environment)
   private readonly DAO_WEIGHTS = {
     bull: parseFloat(process.env.DAO_BULL_WEIGHT || '0.30'),
@@ -97,7 +102,7 @@ class FinalWeatherCalculator {
       // Get cycle data
       const cycleResult = await db.query(`
         SELECT 
-          cycle_id, revealed_location_name, current_weather_data, weather_score, 
+          cycle_id, revealed_location_name, current_weather_data, final_weather_score as weather_score, 
           weather_source, weather_fetch_error, current_state
         FROM weather_cycles 
         WHERE cycle_id = $1
