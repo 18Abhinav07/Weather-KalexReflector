@@ -206,10 +206,10 @@ async function handleBlockEvents() {
   
   if (currentBlock === 6) {
     // Reveal location for agriculture
-    const selectedLocation = locationSelector.getSelectedLocation();
+    selectedLocation = locationSelector.selectRandomLocation();
+    cycleState = 'working';
     logger.info(`🌍 LOCATION REVEALED (Block ${currentBlock}):`);
-    logger.info(`   📍 Selected Agriculture Location: ${selectedLocation.name}`);
-    logger.info(`   🌡️  Current Conditions: ${selectedLocation.description}`);
+    logger.info(`   📍 Selected Agriculture Location: ${selectedLocation.name}, ${selectedLocation.country}`);
     logger.info(`   ⚠️  From this block onwards: AGRICULTURE ONLY (no more wagers allowed)`);
   }
   

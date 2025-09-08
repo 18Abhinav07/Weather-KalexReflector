@@ -197,6 +197,15 @@ class LocationSelector {
   }
 
   /**
+   * Selects a random location for demo purposes.
+   * This is a temporary method to avoid breaking the demo flow.
+   */
+  selectRandomLocation(): Location {
+    const randomIndex = Math.floor(Math.random() * this.locations.length);
+    return this.locations[randomIndex];
+  }
+
+  /**
    * Validate that a location selection was made correctly
    * This can be used for verification of the cryptographic process
    */

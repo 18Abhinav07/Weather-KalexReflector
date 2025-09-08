@@ -57,13 +57,25 @@ class WeatherApiService {
   private readonly API_TIMEOUT = 10000; // 10 seconds
   private readonly MAX_RETRIES = 3;
   
-  // Single weather API configuration (OpenWeatherMap only)  
+  // Weather API configurations
   private readonly APIs = {
     openweather: {
       name: 'OpenWeatherMap',
       url: 'https://api.openweathermap.org/data/2.5/weather',
       key: process.env.OPENWEATHER_API_KEY,
       enabled: !!process.env.OPENWEATHER_API_KEY
+    },
+    weatherapi: {
+      name: 'WeatherAPI.com',
+      url: 'https://api.weatherapi.com/v1/current.json',
+      key: process.env.WEATHERAPI_KEY,
+      enabled: !!process.env.WEATHERAPI_KEY
+    },
+    visualcrossing: {
+      name: 'Visual Crossing',
+      url: 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline',
+      key: process.env.VISUAL_CROSSING_API_KEY,
+      enabled: !!process.env.VISUAL_CROSSING_API_KEY
     }
   };
 
@@ -92,14 +104,15 @@ class WeatherApiService {
 
     // Try each API in sequence until one succeeds
     const apiAttempts = [
-      () => this.fetchFromOpenWeather(location)
+      () => this.fetchFromOpenWeather(location),
+      () => this.fetchFromWeatherApi(location),
+      () => this.fetchFromVisualCrossing(location)
     ];
 
     for (let i = 0; i < apiAttempts.length; i++) {
       const attempt = apiAttempts[i];
       
       try {
-        logger.info(`Weather API attempt ${i + 1}/3 for ${location.name}`);
         const result = await attempt();
         
         if (result.success && result.weather) {
@@ -125,7 +138,7 @@ class WeatherApiService {
         }
         
       } catch (error: any) {
-        logger.warn(`Weather API ${i + 1} failed for ${location.name}: ${error.message}`);
+        logger.warn(`Weather API attempt failed for ${location.name}: ${error.message}`);
       }
 
       // Wait before next attempt
@@ -172,6 +185,80 @@ class WeatherApiService {
       weather: {
         data: weatherData,
         score: 0, // Will be calculated later
+        factors: { temperature: 0, humidity: 0, wind: 0, precipitation: 0 },
+        source: api.name
+      }
+    };
+  }
+
+  /**
+   * Fetch from WeatherAPI.com
+   */
+  private async fetchFromWeatherApi(location: Location): Promise<WeatherApiResult> {
+    const api = this.APIs.weatherapi;
+    if (!api.enabled) {
+      throw new Error('WeatherAPI.com key not configured');
+    }
+
+    const url = `${api.url}?key=${api.key}&q=${location.coordinates.lat},${location.coordinates.lon}`;
+    
+    const response: AxiosResponse = await axios.get(url, {
+      timeout: this.API_TIMEOUT
+    });
+
+    const data = response.data.current;
+    const weatherData: WeatherData = {
+      temperature: data.temp_c,
+      humidity: data.humidity,
+      windSpeed: data.wind_kph,
+      precipitation: data.precip_mm,
+      conditions: data.condition.text,
+      source: api.name,
+      timestamp: new Date()
+    };
+
+    return {
+      success: true,
+      weather: {
+        data: weatherData,
+        score: 0,
+        factors: { temperature: 0, humidity: 0, wind: 0, precipitation: 0 },
+        source: api.name
+      }
+    };
+  }
+
+  /**
+   * Fetch from Visual Crossing API
+   */
+  private async fetchFromVisualCrossing(location: Location): Promise<WeatherApiResult> {
+    const api = this.APIs.visualcrossing;
+    if (!api.enabled) {
+      throw new Error('Visual Crossing API key not configured');
+    }
+
+    const url = `${api.url}/${location.coordinates.lat},${location.coordinates.lon}/today?key=${api.key}&contentType=json&unitGroup=metric`;
+    
+    const response: AxiosResponse = await axios.get(url, {
+      timeout: this.API_TIMEOUT
+    });
+
+    const data = response.data.days[0];
+    const weatherData: WeatherData = {
+      temperature: data.temp,
+      humidity: data.humidity,
+      windSpeed: data.windspeed,
+      precipitation: data.precip,
+      conditions: data.conditions,
+      source: api.name,
+      timestamp: new Date()
+    };
+
+    return {
+      success: true,
+      weather: {
+        data: weatherData,
+        score: 0,
         factors: { temperature: 0, humidity: 0, wind: 0, precipitation: 0 },
         source: api.name
       }
@@ -333,6 +420,12 @@ class WeatherApiService {
         let testSuccess = false;
         if (name === 'openweather') {
           const result = await this.fetchFromOpenWeather(testLocation);
+          testSuccess = result.success;
+        } else if (name === 'weatherapi') {
+          const result = await this.fetchFromWeatherApi(testLocation);
+          testSuccess = result.success;
+        } else if (name === 'visualcrossing') {
+          const result = await this.fetchFromVisualCrossing(testLocation);
           testSuccess = result.success;
         }
         
