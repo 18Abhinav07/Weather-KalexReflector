@@ -220,25 +220,32 @@ class EnhancedUserClient {
   makeEarlyPhaseDecision(block: number, status: CycleStatus) {
     switch (this.user.strategy) {
       case 'alice': // Aggressive
-        // Alice takes early wagers based on instinct if no DAO votes yet
         if (block === 1) {
-          const direction = Math.random() > 0.6 ? 'good' : 'bad'; // Alice's aggressive bias toward good weather
-          const amount = 2500;
-          return { actionType: 'wager', actionData: { direction, amount } };
+          const direction = Math.random() > 0.4 ? 'good' : 'bad'; // More aggressive bias
+          return { actionType: 'wager', actionData: { direction, amount: 3000 } };
         }
-        if (block === 3 && this.weatherPrediction === 'GOOD' && this.confidence > 0.6) {
-          return { actionType: 'plant', actionData: { amount: 2500 } };
+        if (block === 3) {
+          if (this.weatherPrediction === 'GOOD' && this.confidence > 0.5) {
+            return { actionType: 'plant', actionData: { amount: 2500 } };
+          } else {
+            return { actionType: 'wager', actionData: { direction: 'bad', amount: 1000 } };
+          }
         }
-        if (block === 5 && this.weatherPrediction === 'BAD' && this.confidence > 0.6) {
-          return { actionType: 'store', actionData: { amount: 1500 } };
+        if (block === 5 && this.weatherPrediction !== 'UNCERTAIN') {
+          const actionType = this.weatherPrediction === 'GOOD' ? 'plant' : 'store';
+          return { actionType, actionData: { amount: 2000 } };
         }
         break;
         
       case 'bob': // Conservative
-        // Bob waits for DAO votes but makes small early wagers
-        if (block === 2 && this.weatherPrediction !== 'UNCERTAIN') {
-          const direction = this.weatherPrediction === 'GOOD' ? 'good' : 'bad';
-          return { actionType: 'wager', actionData: { direction, amount: 800 } };
+        if (block === 2) {
+          if (this.weatherPrediction !== 'UNCERTAIN') {
+            const direction = this.weatherPrediction === 'GOOD' ? 'good' : 'bad';
+            return { actionType: 'wager', actionData: { direction, amount: 800 } };
+          } else {
+            // Small wager even if uncertain
+            return { actionType: 'wager', actionData: { direction: 'bad', amount: 400 } };
+          }
         }
         if (block === 4 && this.weatherPrediction !== 'GOOD') {
           return { actionType: 'store', actionData: { amount: 1200 } };
@@ -272,11 +279,16 @@ class EnhancedUserClient {
         if (block === 8 && this.weatherPrediction === 'BAD') {
           return { actionType: 'store', actionData: { amount: 2000 } };
         }
+        if (block === 9) {
+            // Final aggressive move
+            const actionType = this.weatherPrediction === 'GOOD' ? 'plant' : 'store';
+            return { actionType, actionData: { amount: 1500 } };
+        }
         break;
         
       case 'bob': // Conservative agriculture
         if (block === 8) {
-          if (this.weatherPrediction === 'GOOD' && this.confidence > 0.75) {
+          if (this.weatherPrediction === 'GOOD' && this.confidence > 0.6) { // Lowered confidence threshold
             return { actionType: 'plant', actionData: { amount: 1500 } };
           } else {
             return { actionType: 'store', actionData: { amount: 1000 } };

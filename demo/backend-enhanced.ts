@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Enhanced game configuration
-const BLOCK_DURATION = 30000; // 30 seconds per block
+const BLOCK_DURATION = 15000; // 15 seconds per block
 const TOTAL_BLOCKS = 10;
 
 app.use(cors());
