@@ -297,7 +297,7 @@ CREATE TABLE cycle_actions (
     user_id UUID NOT NULL REFERENCES users(user_id),
     cycle_id BIGINT NOT NULL,
     block_number BIGINT NOT NULL,
-    action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('agriculture', 'wager', 'stay')),
+    action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('agriculture', 'wager', 'stay', 'plant', 'store')),
     action_data JSONB NOT NULL DEFAULT '{}',
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     
