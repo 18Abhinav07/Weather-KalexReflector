@@ -4,6 +4,7 @@
 import { Keypair } from '@stellar/stellar-sdk';
 import { Client as KaleClient } from 'kale-sc-sdk';
 import { db } from '../database/connection';
+import { Config } from '../config';
 import { plantRequestService } from './plant-request-service';
 import { CustodialWalletManager } from './custodial-wallet-manager';
 import { depositMonitor } from './deposit-monitor';
@@ -36,23 +37,21 @@ export class FarmingAutomationEngine extends EventEmitter {
   private isRunning = false;
   private currentBlock = 0n;
   private automationInterval: NodeJS.Timeout | null = null;
-  private readonly AUTOMATION_INTERVAL = 5000; // Check every 5 seconds
-  private readonly WORK_DELAY_BLOCKS = 24; // Wait 24 blocks (~2 minutes) before work
-  private readonly HARVEST_DELAY_BLOCKS = 48; // Wait 48 blocks (~4 minutes) after work before harvest
+  private readonly AUTOMATION_INTERVAL = Config.FARMING.AUTOMATION_INTERVAL_MS;
+  private readonly WORK_DELAY_BLOCKS = Config.FARMING.WORK_DELAY_BLOCKS;
+  private readonly HARVEST_DELAY_BLOCKS = Config.FARMING.HARVEST_DELAY_BLOCKS;
   private errorCount = 0;
   private processedToday = 0;
-  private readonly MAX_ERRORS = 10;
+  private readonly MAX_ERRORS = Config.FARMING.MAX_ERRORS;
 
   constructor() {
     super();
 
     // Initialize KALE contract client
     this.kaleClient = new KaleClient({
-      rpcUrl: process.env.STELLAR_RPC_URL || 'https://horizon-testnet.stellar.org',
-      contractId: process.env.STELLAR_CONTRACT_ID || '',
-      networkPassphrase: process.env.STELLAR_NETWORK === 'mainnet' 
-        ? 'Public Global Stellar Network ; September 2015'
-        : 'Test SDF Network ; September 2015'
+      rpcUrl: Config.STELLAR.RPC_URL,
+      contractId: Config.STELLAR.CONTRACT_ID,
+      networkPassphrase: Config.STELLAR.NETWORK_PASSPHRASE
     });
 
     this.custodialManager = new CustodialWalletManager();
@@ -450,12 +449,17 @@ export class FarmingAutomationEngine extends EventEmitter {
       });
 
       // Sign and submit transaction
-      result.sign(keypair);
-      const signedTx = await result.send();
+      const signedTx = await result.signAndSend({
+        signTransaction: async (txXdr) => {
+          const tx = result.built!;
+          tx.sign(keypair);
+          return { signedTxXdr: tx.toXDR() };
+        }
+      });
 
       return {
         success: true,
-        transactionHash: signedTx.hash || 'unknown'
+        transactionHash: signedTx.sendTransactionResponse?.hash || 'unknown'
       };
 
     } catch (error) {
@@ -490,12 +494,17 @@ export class FarmingAutomationEngine extends EventEmitter {
       });
 
       // Sign and submit transaction
-      result.sign(keypair);
-      const signedTx = await result.send();
+      const signedTx = await result.signAndSend({
+        signTransaction: async (txXdr) => {
+          const tx = result.built!;
+          tx.sign(keypair);
+          return { signedTxXdr: tx.toXDR() };
+        }
+      });
 
       return {
         success: true,
-        transactionHash: signedTx.hash || 'unknown'
+        transactionHash: signedTx.sendTransactionResponse?.hash || 'unknown'
       };
 
     } catch (error) {
@@ -526,15 +535,20 @@ export class FarmingAutomationEngine extends EventEmitter {
       });
 
       // Sign and submit transaction
-      result.sign(keypair);
-      const signedTx = await result.send();
+      const signedTx = await result.signAndSend({
+        signTransaction: async (txXdr) => {
+          const tx = result.built!;
+          tx.sign(keypair);
+          return { signedTxXdr: tx.toXDR() };
+        }
+      });
 
       // Get harvest reward from contract (simplified - actual implementation would parse result)
       const harvestReward = stakeAmount + BigInt(Math.floor(Number(stakeAmount) * 0.1)); // Base 10% reward
 
       return {
         success: true,
-        transactionHash: signedTx.hash || 'unknown',
+        transactionHash: signedTx.sendTransactionResponse?.hash || 'unknown',
         reward: harvestReward
       };
 

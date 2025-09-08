@@ -5,6 +5,7 @@ import { Horizon } from '@stellar/stellar-sdk';
 import { Asset } from '@stellar/stellar-sdk';
 import { db } from '../database/connection';
 import { EventEmitter } from 'events';
+import { Config } from '../config';
 
 export interface DepositEvent {
   userId: string;
@@ -43,24 +44,23 @@ export class DepositMonitorService extends EventEmitter {
   private isMonitoring = false;
   private monitoringIntervals: Map<string, NodeJS.Timeout> = new Map();
   private readonly KALE_ASSET: Asset;
-  private readonly MONITORING_INTERVAL = 10000; // 10 seconds
-  private readonly CONFIRMATION_BLOCKS = 2; // Wait for 2 blocks confirmation
+  private readonly MONITORING_INTERVAL = Config.DEPOSIT_MONITOR.POLL_INTERVAL_MS;
+  private readonly CONFIRMATION_BLOCKS = Config.DEPOSIT_MONITOR.CONFIRMATION_BLOCKS;
 
   constructor() {
     super();
     
     // Initialize Horizon server
-    const networkUrl = process.env.STELLAR_NETWORK === 'mainnet' 
+    const networkUrl = Config.STELLAR.NETWORK === 'mainnet' 
       ? 'https://horizon.stellar.org'
       : 'https://horizon-testnet.stellar.org';
     
     this.horizonServer = new Horizon.Server(networkUrl);
 
     // Initialize KALE asset
-    const kaleIssuer = process.env.KALE_TOKEN_ADDRESS || 'GBDVX4VELCDSQ54KQJYTNHXAHFLBCA77ZY2USQBM4CSHTTV7DME7KALE';
-    this.KALE_ASSET = new Asset('KALE', kaleIssuer);
+    this.KALE_ASSET = new Asset('KALE', Config.STELLAR.KALE_TOKEN_ADDRESS);
 
-    console.log(`[DepositMonitor] Initialized for ${process.env.STELLAR_NETWORK || 'testnet'} network`);
+    console.log(`[DepositMonitor] Initialized for ${Config.STELLAR.NETWORK} network`);
     console.log(`[DepositMonitor] KALE Asset: ${this.KALE_ASSET.code}:${this.KALE_ASSET.issuer}`);
   }
 

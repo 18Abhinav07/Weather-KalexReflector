@@ -5,7 +5,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { EnvironmentValidator } from './utils/env-validator';
+import { Config } from './config';
 import { weatherFarmingRoutes } from './api/routes';
 import { farmingAutomationEngine } from './services/farming-automation-engine';
 import { depositMonitor } from './services/deposit-monitor';
@@ -15,7 +15,7 @@ import { db } from './database/connection';
 export class WeatherFarmingServer {
   private app: express.Application;
   private server: any;
-  private readonly PORT = process.env.PORT || 3000;
+  private readonly PORT = Config.SERVER.PORT;
 
   constructor() {
     this.app = express();
@@ -33,14 +33,14 @@ export class WeatherFarmingServer {
     
     // CORS configuration
     this.app.use(cors({
-      origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+      origin: Config.SERVER.ALLOWED_ORIGINS,
       credentials: true
     }));
 
     // Rate limiting
     const limiter = rateLimit({
-      windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 100, // Limit each IP to 100 requests per windowMs
+      windowMs: Config.SECURITY.RATE_LIMIT_WINDOW_MS,
+      max: Config.SECURITY.RATE_LIMIT_MAX,
       message: {
         success: false,
         error: 'Too many requests, please try again later'
@@ -127,7 +127,7 @@ export class WeatherFarmingServer {
       
       res.status(500).json({
         success: false,
-        error: process.env.NODE_ENV === 'production' 
+        error: Config.NODE_ENV === 'production' 
           ? 'Internal server error' 
           : error.message
       });
@@ -155,18 +155,9 @@ export class WeatherFarmingServer {
   async start(): Promise<void> {
     try {
       console.log('[Server] Starting Weather Farming System...');
-
-      // Validate environment variables
-      console.log('[Server] Validating environment configuration...');
-      const envValidation = EnvironmentValidator.validate();
-      EnvironmentValidator.printResults(envValidation);
-      
-      if (!envValidation.valid) {
-        console.error('[Server] ❌ Environment validation failed - server startup aborted');
-        process.exit(1);
-      }
-      
-      console.log('[Server] ✅ Environment validation passed');
+      console.log(`[Server] Environment: ${Config.NODE_ENV}`);
+      console.log(`[Server] Network: ${Config.STELLAR.NETWORK}`);
+      console.log(`[Server] Database: ${Config.DATABASE.HOST}:${Config.DATABASE.PORT}/${Config.DATABASE.NAME}`);
 
       // Initialize database connection
       console.log('[Server] Connecting to database...');
